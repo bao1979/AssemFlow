@@ -1,0 +1,12 @@
+{
+  "_doc": "已退场（无后续约束力）的历史决策归档。默认不读取，仅追溯历史时按需读取。",
+  "updatedAt": "2026-06-24",
+  "archived": [
+    {
+      "id": "D-003",
+      "decision": "继承自 clawerworld 的 content-separation.md 改写为 AFP「装配块纯度规范」、test-and-acceptance.md 改写为 AFP 四层测试体系。",
+      "archivedReason": "一次性改写动作已完成，无后续约束力。",
+      "source": "脚手架搭建"
+    }
+  ]
+}

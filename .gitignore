@@ -1,0 +1,39 @@
+# ───────────── 永不上传：密钥与凭证（红区） ─────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+secrets/
+**/credentials.json
+
+# ───────────── Kiro 本地设置（可能含 MCP 凭证/token） ─────────────
+.kiro/settings/
+
+# ───────────── 依赖与构建产物 ─────────────
+node_modules/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ───────────── 测试与覆盖率 ─────────────
+coverage/
+.nyc_output/
+
+# ───────────── 实验产生的本地真实数据（保留 README 与 *.example.*） ─────────────
+data/**/*.local.json
+data/**/*.local.*
+
+# ───────────── 日志 ─────────────
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# ───────────── 编辑器 / 操作系统临时文件 ─────────────
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*~
