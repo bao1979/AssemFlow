@@ -3,8 +3,8 @@
   "updatedAt": "2026-06-25",
   "project": "AssemFlow",
   "summary": "装配流编程（AFP）参考实现引擎。实验①③均已通过：甜区假设为真、封装+复用假设为真。",
-  "phase": "研究验证-实验①③完成",
-  "note": "实验①（甜区）和实验③（封装+复用）均已完成并验收通过。两个核心假设为真：只改配置就能改行为；lodash 纯函数能廉价封装为合规块且跨流复用。下一步可做实验②（边界证伪）或开始引擎最小实现。",
+  "phase": "研究验证-引擎 MVP 完成",
+  "note": "实验①③均通过；引擎 MVP 已实现（check/assemble/graph，7 测试全过）。三个核心能力：静态校验配置图、确定性装配（Ajv 契约校验）、Mermaid 图输出。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -13,13 +13,13 @@
     "ai-skills": { "status": "Done", "notes": "4 个 AFP 工作流 skills。" },
     "tech-stack": { "status": "Done", "notes": "全部定案（D-004~009/011）。详见 system-design.md。" },
     "engine": {
-      "status": "Planned",
-      "notes": "实验①已验证甜区假设为真，可开始考虑引擎实现。",
+      "status": "InProgress",
+      "notes": "MVP 已实现（check/assemble/graph + 薄 CLI），7 测试全过。待扩展：契约对齐校验、死配置检测、where-used。",
       "submodules": {
-        "assembler": { "status": "Planned", "notes": "按配置确定性拼装" },
-        "contract-validator": { "status": "Planned", "notes": "I/O Schema + 版本校验" },
-        "config-graph": { "status": "Planned", "notes": "配置即图：where-used/死配置/影响面" },
-        "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单，防 slopsquatting" }
+        "assembler": { "status": "Done", "notes": "按配置确定性拼装，Ajv 校验输入契约" },
+        "contract-validator": { "status": "InProgress", "notes": "输入校验已做，输出校验 + 步骤间对齐待做" },
+        "config-graph": { "status": "InProgress", "notes": "Mermaid 输出已做，where-used/死配置待做" },
+        "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" }
       }
     },
     "experiments": {
@@ -45,9 +45,9 @@
     { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" }
   ],
   "nextSteps": [
-    "实验②（边界证伪）：挑一个真实的定制需求看 AFP 在哪崩",
-    "或：开始引擎最小实现（实验①③均已验证核心假设成立）",
-    "教程代码课（03-06）可基于实验①③产物填充"
+    "实验②（边界证伪）：用引擎跑一个偏定制的需求，看 AFP 在哪崩",
+    "引擎扩展：契约对齐校验（上步输出 → 下步输入 schema 匹配）、死配置检测、where-used",
+    "教程代码课（03-06）基于实验①产物 + 引擎填充"
   ],
   "openQuestions": [
     "可靠演化如何保证？目前全是假设，需实验证明。",

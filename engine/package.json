@@ -1,0 +1,30 @@
+{
+  "name": "@assemflow/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AssemFlow 确定性装配引擎：按配置把装配块拼成装配流，运行期零 AI",
+  "bin": {
+    "assemflow": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "assemflow": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.33.0",
+    "ajv": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "fast-check": "^3.22.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
