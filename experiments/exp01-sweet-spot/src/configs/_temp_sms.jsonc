@@ -1,0 +1,1 @@
+{"flowName":"user-register","steps":[{"block":"email-validator"},{"block":"password-hasher"},{"block":"user-store"},{"block":"notifier"},{"block":"audit-logger"}],"params":{"notifyChannel":"sms","notifyMessage":"短信欢迎！"}}

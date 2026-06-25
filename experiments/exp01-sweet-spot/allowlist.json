@@ -1,0 +1,14 @@
+{
+  "_doc": "依赖白名单（AFP 决策 D-006）。每个依赖都登记「为什么需要它」，可审计，防止乱拉依赖与 slopsquatting（AI 幻觉包名投毒）。新增依赖前必须先登记到这里。",
+  "experiment": "exp01-sweet-spot",
+  "runtime": {
+    "@sinclair/typebox": "用 TS 写装配块的输入/输出契约，产出标准 JSON Schema",
+    "ajv": "运行时用 JSON Schema 校验数据与契约对齐"
+  },
+  "dev": {
+    "typescript": "类型检查（契约在编译期对齐）",
+    "tsx": "直接运行 TS 拼装脚本，免单独编译步骤",
+    "vitest": "单元测试与属性测试的运行器",
+    "fast-check": "属性测试：验证装配块的确定性纯机制（同输入同输出、无副作用）"
+  }
+}

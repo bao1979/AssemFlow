@@ -41,7 +41,8 @@
     { "id": "D-007", "decision": "契约用 TypeBox(产 JSON Schema)+Ajv 校验，排除 Zod。" },
     { "id": "D-008", "decision": "引擎库优先+薄 CLI；MVP check/assemble/graph；assemble 先运行时编排，codegen 留 v2。" },
     { "id": "D-009", "decision": "配置可视化 MVP 用 Mermaid，交互式 SVG 留后续。" },
-    { "id": "D-010", "decision": "文档体系采用单一真相源(SSOT)模型，无副本、不靠代码同步；AI 每次只更新 state.json 变动字段。" }
+    { "id": "D-010", "decision": "文档体系采用单一真相源(SSOT)模型，无副本、不靠代码同步；AI 每次只更新 state.json 变动字段。" },
+    { "id": "D-011", "decision": "AFP 规模化路线 = 封装现成库（如 lodash）为装配块，而非手写无数块（npm 即装配块原料库）。封装是【设计期】能力（配契约+薄壳，可 AI/工具辅助），不是运行期零 AI 拼装引擎的职责——两者别混。" }
   ],
   "nextSteps": [
     "等待 Plucker518 决定：是否启动实验①、用哪个业务域（建议「注册+发邮件+审计日志」）",
