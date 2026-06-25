@@ -1,20 +1,20 @@
 {
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
-  "updatedAt": "2026-06-24",
+  "updatedAt": "2026-06-25",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。研究稿 v0.1 验证阶段，尚未进入实施。",
-  "phase": "研究验证-脚手架与文档治理",
-  "note": "脚手架/技术栈/文档体系/GitHub 私有仓均已就位。新增两条实验期纪律：实验防偏护栏 + 教学级注释规范，确立「同时是教学项目」定位。教程学习地图骨架已立（docs/tutorial/）。实验①业务域已倾向「调整后的注册流」，待 Plucker518 下达启动指令。",
+  "summary": "装配流编程（AFP）参考实现引擎。实验①③均已通过：甜区假设为真、封装+复用假设为真。",
+  "phase": "研究验证-实验①③完成",
+  "note": "实验①（甜区）和实验③（封装+复用）均已完成并验收通过。两个核心假设为真：只改配置就能改行为；lodash 纯函数能廉价封装为合规块且跨流复用。下一步可做实验②（边界证伪）或开始引擎最小实现。",
   "modules": {
-    "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。docs/装配流编程-可行性分析.md" },
-    "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法；全部 steering 已 AFP 化；新增 experiment-discipline.md(实验防偏) 与 teaching-comments.md(教学级注释)。" },
-    "doc-governance": { "status": "Done", "notes": "文档体系重构为 SSOT：state.json(高频) + system-design.md(中频) + decisions-archive.json(低频) + 根 README(门面)。" },
-    "tutorial": { "status": "InProgress", "notes": "学习地图骨架 + 不依赖代码的四课已写：01(直觉)/02(五元构件)/09(复杂度守恒)/10(粒度演化)。03-08、11 等代码课随实验①/③产出填充。" },
-    "ai-skills": { "status": "Done", "notes": "skills：发现装配块、产配置、写转接件、挖块收敛。" },
-    "tech-stack": { "status": "Done", "notes": "TS + vitest + fast-check；配置 JSON + JSON Schema；契约 TypeBox+Ajv；引擎库优先+薄 CLI(check/assemble/graph)；可视化 Mermaid；白名单跟实验①落地。详见 system-design.md。" },
+    "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
+    "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
+    "doc-governance": { "status": "Done", "notes": "SSOT 模型。" },
+    "tutorial": { "status": "InProgress", "notes": "5 课已写（01/02/07/09/10）。03-06/08/11 等代码课随实验产出填充。" },
+    "ai-skills": { "status": "Done", "notes": "4 个 AFP 工作流 skills。" },
+    "tech-stack": { "status": "Done", "notes": "全部定案（D-004~009/011）。详见 system-design.md。" },
     "engine": {
       "status": "Planned",
-      "notes": "确定性装配引擎（运行期零 AI）。待实验①验证后再决定是否实现。",
+      "notes": "实验①已验证甜区假设为真，可开始考虑引擎实现。",
       "submodules": {
         "assembler": { "status": "Planned", "notes": "按配置确定性拼装" },
         "contract-validator": { "status": "Planned", "notes": "I/O Schema + 版本校验" },
@@ -23,39 +23,39 @@
       }
     },
     "experiments": {
-      "status": "Research",
-      "notes": "三个最小证伪实验，是否启动等待 Plucker518。",
+      "status": "InProgress",
+      "notes": "实验①③已完成。实验②（边界证伪）未开始。",
       "submodules": {
-        "exp01-sweet-spot": { "status": "Planned", "notes": "甜区证伪：全新微项目，3 块+1 配置纯脚本拼装" },
-        "exp02-boundary": { "status": "Planned", "notes": "边界证伪：用 clawerworld 真实定制需求找崩点" },
-        "exp03-reuse": { "status": "Planned", "notes": "复用证伪：第二业务流复用第一业务流的装配块" }
+        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。5 块 + 配置 + 拼装 + 15 测试全过。核心证据：只改配置行为就变。" },
+        "exp02-boundary": { "status": "Planned", "notes": "边界证伪：用真实定制需求找 AFP 崩点" },
+        "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。lodash 纯函数封装成本极低（薄壳 1-2 行），跨流复用零修改。反例 _.now 被属性测试自动挡住。" }
       }
     }
   },
   "decisions": [
     { "id": "D-001", "decision": "AFP 唯一楔子是确定性纪律：AI 只在设计期产配置、运行期零 AI。" },
-    { "id": "D-002", "decision": "生态定位修正为「装配块 + 转接模式 + 配置模板的市场」，放弃「开箱即用业务流市场」。" },
+    { "id": "D-002", "decision": "生态定位修正为「装配块 + 转接模式 + 配置模板的市场」。" },
     { "id": "D-004", "decision": "参考实现栈 TypeScript + vitest + fast-check；配置源 JSON(JSONC)+JSON Schema。" },
-    { "id": "D-005", "decision": "配置格式 JSON，排除 HTML 作配置源；HTML 仅作引擎派生可视化视图。" },
-    { "id": "D-006", "decision": "依赖白名单跟实验①一起落地。" },
-    { "id": "D-007", "decision": "契约用 TypeBox(产 JSON Schema)+Ajv 校验，排除 Zod。" },
-    { "id": "D-008", "decision": "引擎库优先+薄 CLI；MVP check/assemble/graph；assemble 先运行时编排，codegen 留 v2。" },
-    { "id": "D-009", "decision": "配置可视化 MVP 用 Mermaid，交互式 SVG 留后续。" },
-    { "id": "D-010", "decision": "文档体系采用单一真相源(SSOT)模型，无副本、不靠代码同步；AI 每次只更新 state.json 变动字段。" },
-    { "id": "D-011", "decision": "AFP 规模化路线 = 封装现成库（如 lodash）为装配块，而非手写无数块（npm 即装配块原料库）。封装是【设计期】能力（配契约+薄壳，可 AI/工具辅助），不是运行期零 AI 拼装引擎的职责——两者别混。" }
+    { "id": "D-005", "decision": "配置格式 JSON；HTML 仅作引擎派生可视化视图。" },
+    { "id": "D-006", "decision": "依赖白名单已随实验①落地（allowlist.json）。" },
+    { "id": "D-007", "decision": "契约用 TypeBox(产 JSON Schema)+Ajv 校验。" },
+    { "id": "D-008", "decision": "引擎库优先+薄 CLI；MVP check/assemble/graph；assemble 先运行时编排。" },
+    { "id": "D-009", "decision": "配置可视化 MVP 用 Mermaid。" },
+    { "id": "D-010", "decision": "文档体系 SSOT 模型。" },
+    { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" }
   ],
   "nextSteps": [
-    "等待 Plucker518 决定：是否启动实验①、用哪个业务域（建议「注册+发邮件+审计日志」）",
-    "若启动实验①：手写 3 个装配块 + 1 份 JSON 配置 + 纯脚本拼装，并落地 allowlist.json 最小载体"
+    "实验②（边界证伪）：挑一个真实的定制需求看 AFP 在哪崩",
+    "或：开始引擎最小实现（实验①③均已验证核心假设成立）",
+    "教程代码课（03-06）可基于实验①③产物填充"
   ],
   "openQuestions": [
-    "实验①的业务域选哪个？",
-    "是否认可「确定性纪律是唯一楔子」定位？",
-    "研究稿是否需补维度（商业模式/开源治理/与 MCP 关系）？",
-    "英文版 README 何时生成（当前仅中文）？",
-    "可靠演化如何保证？（自动迁移在语义级破坏性变更上未必成立、多版本碎片化、特性交互无解）目前全是理论假设，需前置思考并在实验中证明"
+    "可靠演化如何保证？目前全是假设，需实验证明。",
+    "高阶函数/有副作用的库如何封装？（lodash 简单签名已验证，复杂签名待探索）",
+    "英文版 README 何时生成？",
+    "研究稿是否需补维度（商业模式/开源治理/与 MCP 关系）？"
   ],
   "knownIssues": [
-    { "id": "K-EVOL", "issue": "可靠演化未经证明，是 AFP 最薄弱一环。文档相关断言已降级为「待验证假设」。需专门设计演化验证（可扩展实验③：让块发生一次真实 breaking change，看配置/转接件/引擎能否可靠接住）。", "status": "open" }
+    { "id": "K-EVOL", "issue": "可靠演化未经证明，是 AFP 最薄弱一环。需专门设计演化验证。", "status": "open" }
   ]
 }

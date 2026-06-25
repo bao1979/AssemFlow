@@ -1,0 +1,16 @@
+{
+  "_doc": "依赖白名单（D-006）。每个依赖登记为什么需要它。",
+  "experiment": "exp03-wrap-reuse",
+  "runtime": {
+    "@sinclair/typebox": "写装配块 I/O 契约，产 JSON Schema",
+    "ajv": "运行时 JSON Schema 校验",
+    "lodash-es": "被封装的目标库（ESM 版 lodash，npm 下载量最大的工具库）"
+  },
+  "dev": {
+    "@types/lodash-es": "lodash-es 的 TypeScript 类型定义",
+    "typescript": "类型检查",
+    "tsx": "直接运行 TS",
+    "vitest": "测试运行器",
+    "fast-check": "属性测试"
+  }
+}
