@@ -4,7 +4,7 @@
   "project": "AssemFlow",
   "summary": "装配流编程（AFP）参考实现引擎。三个验证实验全部完成，核心假设验证通过，边界已划清。引擎 MVP 已实现。",
   "phase": "研究验证-全部实验完成",
-  "note": "三个实验全部完成：①甜区为真（只改配置改行为）②边界划清（条件密集的规则变更不在甜区）③封装+复用为真（lodash 纯函数廉价封装跨流复用）。引擎 MVP 已实现（check 含契约对齐+死配置，assemble，graph）。下一步：教程代码课 / 引擎进一步扩展 / 或开始正式产品化讨论。",
+  "note": "三个实验全部完成且修复了五条审计问题：①实验①现在真正按 steps 驱动装配（空 steps 不执行）②引擎 assemble 补了输出校验（输出不符 schema 中断）③CLI check 接入真正的 checkConfig（需 --blocks 清单）④CLI 明确 assemble 只能通过库 API⑤实验① typecheck 通过。引擎 13 测试、实验① 16 测试全过。教程 11 课已完成。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -14,21 +14,21 @@
     "tech-stack": { "status": "Done", "notes": "全部定案（D-004~009/011）。详见 system-design.md。" },
     "engine": {
       "status": "InProgress",
-      "notes": "MVP 已实现（check/assemble/graph + 薄 CLI），7 测试全过。待扩展：契约对齐校验、死配置检测、where-used。",
+      "notes": "MVP 完成（13 测试全过）：check（悬空引用+契约对齐+死配置）、assemble（输入+输出双校验）、graph（Mermaid）、CLI（check 接入真校验，assemble 仅库 API）。待扩展：where-used。",
       "submodules": {
-        "assembler": { "status": "Done", "notes": "按配置确定性拼装，Ajv 校验输入契约" },
-        "contract-validator": { "status": "InProgress", "notes": "输入校验已做，输出校验 + 步骤间对齐待做" },
-        "config-graph": { "status": "InProgress", "notes": "Mermaid 输出已做，where-used/死配置待做" },
+        "assembler": { "status": "Done", "notes": "按配置确定性拼装，Ajv 校验输入+输出双契约" },
+        "contract-validator": { "status": "Done", "notes": "输入校验+输出校验+步骤间契约对齐（check 静态）" },
+        "config-graph": { "status": "InProgress", "notes": "Mermaid 输出+死配置检测已做，where-used 待做" },
         "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" }
       }
     },
     "experiments": {
-      "status": "InProgress",
-      "notes": "三个实验全部完成。①甜区为真 ②边界已划清 ③封装+复用为真。",
+      "status": "Done",
+      "notes": "三个实验全部完成并通过审计修复。",
       "submodules": {
-        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。5 块 + 配置 + 拼装 + 15 测试全过。核心证据：只改配置行为就变。" },
-        "exp02-boundary": { "status": "Done", "notes": "边界已划清。崩点：规则条件是函数，不能放 JSON 配置，业务频繁改条件时 AFP 甜区假设失效。AFP 适用线：线性/枚举路由、策略变更=调参数；线外：条件密集+频繁变的业务规则、动态管道。" },
-        "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。lodash 纯函数封装成本极低（薄壳 1-2 行），跨流复用零修改。反例 _.now 被属性测试自动挡住。" }
+        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。真正按 steps 驱动装配（审计修复后），16 测试全过，typecheck 通过。" },
+        "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
+        "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。lodash 纯函数廉价封装跨流复用。" }
       }
     }
   },
@@ -45,9 +45,9 @@
     { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" }
   ],
   "nextSteps": [
-    "教程代码课（03-06/08）基于三个实验产物填充",
     "引擎扩展：where-used 影响面分析",
-    "或：开始产品化讨论（是否把引擎打包发布、文档对外开放、英文 README 等）"
+    "产品化讨论：引擎打包发布 / 文档对外开放 / 英文 README",
+    "或：演化验证实验（K-EVOL）"
   ],
   "openQuestions": [
     "可靠演化如何保证？目前全是假设，需实验证明。",

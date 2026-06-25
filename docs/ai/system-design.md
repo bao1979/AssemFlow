@@ -120,17 +120,18 @@ JSON 缺点的缓解：
 
 **库优先 + 薄 CLI。** 引擎核心是 `@assemflow/core` 库（可被冒烟脚本 import、可被测试直调），`assemflow` CLI 只是入口。
 
-MVP 命令集（git 风格 `assemflow <verb>`）：
+CLI 命令：
 
-| 命令 | 职责 | 阶段 |
+| 命令 | 职责 | 状态 |
 | :--- | :--- | :--- |
-| `assemflow check <config>` | 静态校验配置图：契约对齐、悬空引用、死配置、静态可枚举红线。只读，退出码 0/1 | MVP |
-| `assemflow assemble <config>` | 按配置确定性装配出可运行的装配流 | MVP |
-| `assemflow graph <config>` | 输出配置图（喂给可视化） | MVP |
+| `assemflow check <config> --blocks <manifest>` | 静态校验配置图：悬空引用、契约对齐、死配置。需块清单（含 schema，不含 execute） | 已实现 |
+| `assemflow graph <config>` | 输出 Mermaid 配置图 | 已实现 |
 | `assemflow where-used <block>` | 影响面分析 | 后续 |
 
-- CLI 解析器先用 Node 内置 `util.parseArgs`（零依赖，符合白名单从严）；命令多了再换 cac。
-- **`assemble` 产出形态**：MVP 用**运行时编排**（读配置 → Ajv 校验 → 把已编译的块按图串成可调用 flow），"过编译"由整个 TS 工程 tsc + Ajv 双重保证。**代码生成（codegen，吐 `.ts` 源码）留作 v2 增强**，避免实验①被拖重。
+**`assemble` 不走 CLI，仅通过库 API 调用。** 原因：assemble 必须注册块的 `execute` 函数（真实代码），纯 CLI 无法提供——需要使用者在 TS 代码里 `import { assemble } from "@assemflow/core"` 并注册块。这是设计决定，不是能力缺失。
+
+- CLI 解析器用 Node 内置 `util.parseArgs`（零依赖）。
+- **`assemble` 产出形态**：运行时编排（读配置 → Ajv 校验输入+输出双契约 → 按图串块执行）。codegen（吐 `.ts` 源码）留作 v2 增强。
 
 ### 配置可视化（已定案）
 

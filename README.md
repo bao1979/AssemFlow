@@ -37,18 +37,19 @@ flowchart LR
 
 ## 技术栈
 
-- 引擎：TypeScript（库优先 + 薄 CLI `assemflow`）
-- 契约：TypeBox（产 JSON Schema）+ Ajv 校验
+- 引擎：TypeScript（`@assemflow/core` 库 + 薄 CLI `assemflow check`/`graph`；`assemble` 仅库 API）
+- 契约：TypeBox（产 JSON Schema）+ Ajv 双校验（输入+输出）
 - 配置：JSON + JSON Schema（纯数据，物理上堵死"算法入配置"）
 - 测试：vitest + fast-check（属性测试验证装配块的确定性纯机制）
 - 可视化：Mermaid
 
 ## 当前状态
 
-研究稿 v0.1 验证阶段，尚未进入实施。详细进度见 [`docs/ai/state.json`](docs/ai/state.json)。
+三个验证实验全部完成（甜区✅ 边界✅ 封装+复用✅），引擎 MVP 已实现（13 测试），教程 11 课已写。详细进度见 [`docs/ai/state.json`](docs/ai/state.json)。
 
 ## 文档导航
 
+- [教程（11 课）](docs/tutorial/README.md) —— 从零学 AFP，由浅入深
 - [可行性分析](docs/装配流编程-可行性分析.md) —— 范式的先例扫描与可行性论证
 - [系统设计](docs/ai/system-design.md) —— 架构、目录、技术栈论证
 - [项目状态](docs/ai/state.json) —— 进度、决策、下一步（单一真相源）

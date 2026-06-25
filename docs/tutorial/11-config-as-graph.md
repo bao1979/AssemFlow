@@ -26,14 +26,30 @@ AFP 把复杂度搬到配置里。配置是纯数据（JSON），天生是一张
 
 ## 试一下
 
-用引擎的 check 跑实验①的配置（需要编程方式注册块，CLI 只做格式校验）：
+引擎 CLI 的 `check` 命令已接入真正的静态校验（需提供块清单文件）：
+
+```powershell
+cd engine
+npx tsx src/cli.ts check <config.json> --blocks <manifest.json>
+```
+
+它会检查悬空引用、契约对齐、死配置——全部在不执行块的情况下完成。
+
+如果引用了不存在的块：
+```
+❌ [步骤 0] 块 "nonexistent" 不存在于注册表（已注册：greet, upper）
+```
+
+`assemble`（运行时编排）通过库 API 编程调用（见 `engine/tests/engine.test.ts` 里的用法），不走 CLI。
+
+要看测试验证：
 
 ```powershell
 cd engine
 npm test
 ```
 
-看 `check（静态校验）` 和 `check · 契约对齐` 相关测试——它们验证了引擎在不执行块的情况下就能发现问题。
+`check（静态校验）` 和 `check · 契约对齐` 相关测试验证了引擎在不执行块的情况下就能发现问题。
 
 ## Mermaid 可视化
 
