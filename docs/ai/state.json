@@ -9,7 +9,7 @@
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
     "doc-governance": { "status": "Done", "notes": "SSOT 模型。" },
-    "tutorial": { "status": "InProgress", "notes": "5 课已写（01/02/07/09/10）。03-06/08/11 等代码课随实验产出填充。" },
+    "tutorial": { "status": "Done", "notes": "全部 11 课已写完。直觉/上手/纪律与边界/理论深潜四部分完整。" },
     "ai-skills": { "status": "Done", "notes": "4 个 AFP 工作流 skills。" },
     "tech-stack": { "status": "Done", "notes": "全部定案（D-004~009/011）。详见 system-design.md。" },
     "engine": {
