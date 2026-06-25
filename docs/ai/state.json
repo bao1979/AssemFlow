@@ -50,12 +50,9 @@
     "或：演化验证实验（K-EVOL）"
   ],
   "openQuestions": [
-    "可靠演化如何保证？目前全是假设，需实验证明。",
-    "高阶函数/有副作用的库如何封装？（lodash 简单签名已验证，复杂签名待探索）",
-    "英文版 README 何时生成？",
-    "研究稿是否需补维度（商业模式/开源治理/与 MCP 关系）？"
+    "详见 docs/open-questions.md。本字段仅保留索引：Q-001~Q-010。"
   ],
   "knownIssues": [
-    { "id": "K-EVOL", "issue": "可靠演化未经证明，是 AFP 最薄弱一环。需专门设计演化验证。", "status": "open" }
+    { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" }
   ]
 }
