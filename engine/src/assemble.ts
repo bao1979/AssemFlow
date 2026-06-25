@@ -75,6 +75,16 @@ export function assemble(
     // 执行块
     const output = block.execute(blockInput) as Record<string, unknown>;
 
+    // 用 Ajv 校验输出是否符合块声明的 outputSchema（强契约的运行时保障）
+    const validateOutput = ajv.compile(block.outputSchema);
+    if (!validateOutput(output)) {
+      return {
+        success: false,
+        context,
+        error: `块 "${block.name}" 输出校验失败: ${ajv.errorsText(validateOutput.errors)}`,
+      };
+    }
+
     // 输出存入上下文：块名存完整输出，同时把输出字段摊平到顶层方便下一步取值
     context[step.block] = output;
     if (typeof output === "object" && output !== null) {

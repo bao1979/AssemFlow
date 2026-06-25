@@ -1,97 +1,90 @@
 /**
- * 【拼装脚本】模拟"引擎照配置把块串起来执行"
+ * 【拼装脚本】真正按配置的 steps 驱动执行
  * ────────────────────────────────────────────────────────────
- * 这是什么：一段手写脚本，模拟将来引擎的 assemble 命令会做的事。
- *           它读配置 → 按配置里的步骤顺序调块 → 把上一步的输出喂给下一步。
- *
- * 为什么不造引擎：实验①的目标只是验证"只改配置就能改行为"这个假设。
- *                用手写脚本就够了，避免过早投入引擎开发。
- *
- * 确定性保证：这个脚本里没有随机、没有时钟（时间戳和盐都是外部传入的参数），
- *            同样的配置 + 同样的输入数据 → 每次运行结果完全一样。
+ * 修复前的问题：steps 数组是摆设，执行顺序是硬编码的。
+ * 修复后：脚本读配置 → 按 steps 遍历 → 根据块名动态调用对应函数。
+ * 如果 steps 是空的或者顺序变了，行为就会跟着变——这才是"配置驱动装配"。
  */
 
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { emailValidate } from "./blocks/email-validator.js";
 import { hashPassword } from "./blocks/password-hasher.js";
 import { storeUser } from "./blocks/user-store.js";
 import { notify } from "./blocks/notifier.js";
 import { appendAuditLog } from "./blocks/audit-logger.js";
 
+// ── 块注册表（块名 → 执行函数）────────────────────────────
+const blockRegistry: Record<string, (input: Record<string, unknown>) => unknown> = {
+  "email-validator": (ctx) => emailValidate({ email: ctx["email"] as string }),
+  "password-hasher": (ctx) => hashPassword({ password: ctx["password"] as string, salt: ctx["salt"] as string }),
+  "user-store": (ctx) => storeUser({ users: (ctx["users"] ?? []) as Array<{ email: string; passwordHash: string }>, newUser: { email: ctx["email"] as string, passwordHash: (ctx["hash"] as string) ?? "" } }),
+  "notifier": (ctx) => notify({ sent: (ctx["sent"] ?? []) as Array<{ channel: "email" | "sms"; to: string; message: string }>, channel: ctx["notifyChannel"] as "email" | "sms", to: ctx["email"] as string, message: ctx["notifyMessage"] as string }),
+  "audit-logger": (ctx) => appendAuditLog({ logs: (ctx["logs"] ?? []) as Array<{ timestamp: string; action: string; detail: string }>, timestamp: ctx["timestamp"] as string, action: "register", detail: ctx["email"] as string }),
+};
+
 // ── 读配置 ──────────────────────────────────────────────────
-// 用 JSON.parse 去掉 JSONC 里的注释（简单处理：去掉 // 开头的行）
 function loadConfig(path: string) {
   const raw = readFileSync(path, "utf-8");
   const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
   return JSON.parse(stripped);
 }
 
-// ── 执行注册流 ──────────────────────────────────────────────
+// ── 执行装配流 ──────────────────────────────────────────────
 export interface RegisterInput {
   email: string;
   password: string;
-  salt: string;       // 显式传入，保证确定性
-  timestamp: string;  // 显式传入，不读系统时钟
+  salt: string;
+  timestamp: string;
 }
 
 export interface RegisterResult {
   success: boolean;
   error?: string;
-  notifyChannel?: string;
-  users?: Array<{ email: string; passwordHash: string }>;
-  logs?: Array<{ timestamp: string; action: string; detail: string }>;
-  sent?: Array<{ channel: string; to: string; message: string }>;
+  context: Record<string, unknown>;
 }
 
 export function assembleAndRun(configPath: string, input: RegisterInput): RegisterResult {
   const config = loadConfig(configPath);
-  const { notifyChannel, notifyMessage } = config.params;
 
-  // 步骤 1：查邮箱
-  const emailResult = emailValidate({ email: input.email });
-  if (!emailResult.valid) {
-    return { success: false, error: emailResult.errorCode };
+  // 上下文 = 配置参数 + 调用方输入
+  const context: Record<string, unknown> = {
+    ...(config.params ?? {}),
+    ...input,
+  };
+
+  // 关键：按 config.steps 遍历——顺序、数量都由配置决定
+  for (const step of config.steps) {
+    const blockName: string = step.block;
+    const blockFn = blockRegistry[blockName];
+
+    if (!blockFn) {
+      return { success: false, error: `块 "${blockName}" 未注册`, context };
+    }
+
+    // 执行块，把输出摊平到上下文
+    const output = blockFn(context);
+    if (typeof output === "object" && output !== null) {
+      for (const [k, v] of Object.entries(output as Record<string, unknown>)) {
+        context[k] = v;
+      }
+    }
+
+    // 如果块返回了 valid: false，中断流程（校验失败）
+    if ("valid" in (output as Record<string, unknown>) && (output as Record<string, unknown>)["valid"] === false) {
+      return { success: false, error: (output as Record<string, unknown>)["errorCode"] as string, context };
+    }
   }
 
-  // 步骤 2：加密密码
-  const hashResult = hashPassword({ password: input.password, salt: input.salt });
-
-  // 步骤 3：存用户
-  const storeResult = storeUser({
-    users: [],
-    newUser: { email: input.email, passwordHash: hashResult.hash },
-  });
-
-  // 步骤 4：发通知（渠道由配置决定）
-  const notifyResult = notify({
-    sent: [],
-    channel: notifyChannel,
-    to: input.email,
-    message: notifyMessage,
-  });
-
-  // 步骤 5：记审计
-  const auditResult = appendAuditLog({
-    logs: [],
-    timestamp: input.timestamp,
-    action: "register",
-    detail: input.email,
-  });
-
-  return {
-    success: true,
-    notifyChannel,
-    users: storeResult.users,
-    logs: auditResult.logs,
-    sent: notifyResult.sent,
-  };
+  return { success: true, context };
 }
 
-// ── 如果直接运行这个脚本（npm run assemble），打印结果 ──────
+// ── 直接运行 ────────────────────────────────────────────────
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const isDirectRun = process.argv[1]?.includes("assemble");
 if (isDirectRun) {
-  const configPath = resolve(import.meta.dirname!, "configs/register.jsonc");
+  const configPath = resolve(__dirname, "configs/register.jsonc");
   const result = assembleAndRun(configPath, {
     email: "test@example.com",
     password: "P@ss1234",

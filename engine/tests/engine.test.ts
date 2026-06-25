@@ -204,3 +204,27 @@ describe("check · 死配置检测", () => {
     expect(diag.filter((d) => d.message.includes("死配置"))).toHaveLength(0);
   });
 });
+
+describe("assemble · 输出校验", () => {
+  it("块输出不符合 outputSchema 时报错", () => {
+    const reg = new BlockRegistry();
+
+    // 块声明输出 string，但实际返回 number
+    const badBlock: BlockDef = {
+      name: "bad-output",
+      inputSchema: Type.Object({}),
+      outputSchema: Type.Object({ value: Type.String() }),
+      execute: () => ({ value: 42 }), // 故意返回 number
+    };
+    reg.register(badBlock);
+
+    const config: FlowConfig = {
+      flowName: "output-check",
+      steps: [{ block: "bad-output" }],
+    };
+
+    const result = assemble(config, reg);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("输出校验失败");
+  });
+});
