@@ -4,11 +4,12 @@
   "project": "AssemFlow",
   "summary": "装配流编程（AFP）参考实现引擎。研究稿 v0.1 验证阶段，尚未进入实施。",
   "phase": "研究验证-脚手架与文档治理",
-  "note": "可行性分析与全部 steering 已 AFP 化；技术栈全部定案（D-004~009）；文档体系已重构为单一真相源模型。仅剩「是否启动实验①及业务域」待 Plucker518 决定。",
+  "note": "脚手架/技术栈/文档体系/GitHub 私有仓均已就位。新增两条实验期纪律：实验防偏护栏 + 教学级注释规范，确立「同时是教学项目」定位。教程学习地图骨架已立（docs/tutorial/）。实验①业务域已倾向「调整后的注册流」，待 Plucker518 下达启动指令。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。docs/装配流编程-可行性分析.md" },
-    "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 作为项目宪法；全部 steering 已 AFP 化。" },
+    "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法；全部 steering 已 AFP 化；新增 experiment-discipline.md(实验防偏) 与 teaching-comments.md(教学级注释)。" },
     "doc-governance": { "status": "Done", "notes": "文档体系重构为 SSOT：state.json(高频) + system-design.md(中频) + decisions-archive.json(低频) + 根 README(门面)。" },
+    "tutorial": { "status": "InProgress", "notes": "学习地图骨架 + 不依赖代码的四课已写：01(直觉)/02(五元构件)/09(复杂度守恒)/10(粒度演化)。03-08、11 等代码课随实验①/③产出填充。" },
     "ai-skills": { "status": "Done", "notes": "skills：发现装配块、产配置、写转接件、挖块收敛。" },
     "tech-stack": { "status": "Done", "notes": "TS + vitest + fast-check；配置 JSON + JSON Schema；契约 TypeBox+Ajv；引擎库优先+薄 CLI(check/assemble/graph)；可视化 Mermaid；白名单跟实验①落地。详见 system-design.md。" },
     "engine": {
@@ -50,7 +51,10 @@
     "实验①的业务域选哪个？",
     "是否认可「确定性纪律是唯一楔子」定位？",
     "研究稿是否需补维度（商业模式/开源治理/与 MCP 关系）？",
-    "英文版 README 何时生成（当前仅中文）？"
+    "英文版 README 何时生成（当前仅中文）？",
+    "可靠演化如何保证？（自动迁移在语义级破坏性变更上未必成立、多版本碎片化、特性交互无解）目前全是理论假设，需前置思考并在实验中证明"
   ],
-  "knownIssues": []
+  "knownIssues": [
+    { "id": "K-EVOL", "issue": "可靠演化未经证明，是 AFP 最薄弱一环。文档相关断言已降级为「待验证假设」。需专门设计演化验证（可扩展实验③：让块发生一次真实 breaking change，看配置/转接件/引擎能否可靠接住）。", "status": "open" }
+  ]
 }
