@@ -2,9 +2,9 @@
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
   "updatedAt": "2026-06-25",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。实验①③均已通过：甜区假设为真、封装+复用假设为真。",
-  "phase": "研究验证-引擎 MVP 完成",
-  "note": "实验①③均通过；引擎 MVP 已实现（check/assemble/graph，7 测试全过）。三个核心能力：静态校验配置图、确定性装配（Ajv 契约校验）、Mermaid 图输出。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个验证实验全部完成，核心假设验证通过，边界已划清。引擎 MVP 已实现。",
+  "phase": "研究验证-全部实验完成",
+  "note": "三个实验全部完成：①甜区为真（只改配置改行为）②边界划清（条件密集的规则变更不在甜区）③封装+复用为真（lodash 纯函数廉价封装跨流复用）。引擎 MVP 已实现（check 含契约对齐+死配置，assemble，graph）。下一步：教程代码课 / 引擎进一步扩展 / 或开始正式产品化讨论。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -24,10 +24,10 @@
     },
     "experiments": {
       "status": "InProgress",
-      "notes": "实验①③已完成。实验②（边界证伪）未开始。",
+      "notes": "三个实验全部完成。①甜区为真 ②边界已划清 ③封装+复用为真。",
       "submodules": {
         "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。5 块 + 配置 + 拼装 + 15 测试全过。核心证据：只改配置行为就变。" },
-        "exp02-boundary": { "status": "Planned", "notes": "边界证伪：用真实定制需求找 AFP 崩点" },
+        "exp02-boundary": { "status": "Done", "notes": "边界已划清。崩点：规则条件是函数，不能放 JSON 配置，业务频繁改条件时 AFP 甜区假设失效。AFP 适用线：线性/枚举路由、策略变更=调参数；线外：条件密集+频繁变的业务规则、动态管道。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。lodash 纯函数封装成本极低（薄壳 1-2 行），跨流复用零修改。反例 _.now 被属性测试自动挡住。" }
       }
     }
@@ -45,9 +45,9 @@
     { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" }
   ],
   "nextSteps": [
-    "实验②（边界证伪）：用引擎跑一个偏定制的需求，看 AFP 在哪崩",
-    "引擎扩展：契约对齐校验（上步输出 → 下步输入 schema 匹配）、死配置检测、where-used",
-    "教程代码课（03-06）基于实验①产物 + 引擎填充"
+    "教程代码课（03-06/08）基于三个实验产物填充",
+    "引擎扩展：where-used 影响面分析",
+    "或：开始产品化讨论（是否把引擎打包发布、文档对外开放、英文 README 等）"
   ],
   "openQuestions": [
     "可靠演化如何保证？目前全是假设，需实验证明。",
