@@ -50,7 +50,7 @@
     "或：演化验证实验（K-EVOL）"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。本字段仅保留索引：Q-001~Q-010。"
+    "详见 docs/open-questions.md。本字段仅保留索引：Q-001~Q-020。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" }
