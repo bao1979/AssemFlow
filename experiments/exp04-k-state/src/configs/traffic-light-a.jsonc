@@ -1,0 +1,28 @@
+// 【配置 A】红绿灯 · 方案 A（纯 AFP）接线蓝图
+// ──────────────────────────────────────────────────────────────
+// 受控变量「状态存活在哪」的 A 侧物理体现：状态在配置里【可见】。
+//
+// 这份配置引用纯块 traffic-light-step（入 {state, input} → 出 {nextState}）。
+// inputMap 显式把上下文里的 state 与 input 都接进块——
+// 于是读这份配置就能一眼看出状态怎么流入、又从哪流出（nextState）。
+// 状态由调用方在回合间 thread（driver-a 负责持有），块本身无记忆。
+//
+// 【对比材料 · config 可读性维度】
+// 把本文件与 traffic-light-b.jsonc 并排看：
+//   A（这里）inputMap 含 "state" —— 状态流向显式可审，但每回合穿全量、配置啰嗦；
+//   B（那边）inputMap 只有 "input" —— 状态从配置里消失、读不出状态流向。
+// 两份 inputMap 的这个差异，就是「配置可读性 / AI 友好度」维度的实测材料。
+{
+  "flowName": "traffic-light-a",
+
+  // 单步：引用纯块，显式接线 state 进、input 进（出 nextState 由引擎摊平回上下文）
+  "steps": [
+    {
+      "block": "traffic-light-step",
+      "inputMap": {
+        "state": "state",
+        "input": "input"
+      }
+    }
+  ]
+}

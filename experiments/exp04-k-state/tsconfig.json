@@ -1,0 +1,17 @@
+{
+  // AFP 实验④（K-STATE）的 TypeScript 配置，对齐 exp01：ESM + strict 全开。
+  // 装配块的契约靠类型系统兜底，越严越能在编译期抓住接错。
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "tests"]
+}

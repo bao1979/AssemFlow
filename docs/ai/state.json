@@ -20,7 +20,7 @@
         "contract-validator": { "status": "Done", "notes": "悬空+契约对齐+死配置+initialInput 字段识别" },
         "config-graph": { "status": "InProgress", "notes": "线性 Mermaid + 死配置检测；where-used 待做" },
         "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" },
-        "state-support": { "status": "Planned", "notes": "状态机/有状态块支持（Q-026 验证后定方案）" },
+        "state-support": { "status": "Planned", "notes": "状态机/有状态块支持。MVP-0（Q-026）已出阶段性默认：默认起点选 A（调用方持久化，引擎不变），非终局；B（引擎承载状态）的 reset/快照/隔离待 MVP-1 复审后再定是否做" },
         "loop-step": { "status": "Planned", "notes": "循环 step 支持（Q-027 验证后定方案）" }
       }
     },
@@ -31,7 +31,7 @@
         "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。已端到端跑在 @assemflow/core.assemble() 上。" },
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
-        "exp04-k-state": { "status": "Planned", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 + 状态承载方案对比" },
+        "exp04-k-state": { "status": "Done", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 A/B 状态承载对比，typecheck 0 错、16 测试全过、A 路端到端跑通。阶段性默认起点选 A（调用方持久化），非终局、待 MVP-1 大状态复审。详见 experiments/exp04-k-state/REPORT.md" },
         "exp06-sokoban": { "status": "Planned", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路含 K-LOOP(Q-027)、MVP-2 推箱子、MVP-3 5关数据驱动、MVP-4 maxMoves+撤销。不单设 exp05。" }
       }
     },
@@ -60,7 +60,7 @@
     "按 MVP 链推进：MVP-0 → MVP-1 → MVP-2 → MVP-3 → MVP-4"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024~Q-028；已 resolved：Q-005、Q-021~Q-023。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"
+    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025、Q-027、Q-028；in_progress：Q-026（MVP-0 完成，得阶段性默认 A，非终局）；已 resolved：Q-005、Q-021~Q-023。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },
