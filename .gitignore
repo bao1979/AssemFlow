@@ -37,3 +37,7 @@ Thumbs.db
 .idea/
 *.swp
 *~
+.bitfun/
+
+# ───────────── 实验冒烟测试副产物（每次跑都重写） ─────────────
+experiments/**/configs/_temp_*.jsonc

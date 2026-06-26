@@ -112,15 +112,23 @@
 
 **为什么重要**：是 Q-002/Q-003 的前置条件。引擎没接管真实流，配置驱动复用和 AI 产配置都没意义。
 
-**当前状态**：引擎 MVP 已实现（13 测试），但未在实验上端到端。
+**状态**：`resolved`
 
-**验证思路**：把实验①的 `assembleAndRun` 改写为调 `@assemflow/core`：用引擎的 `BlockRegistry` 注册 5 个块，用引擎的 `assemble` 替代手写的 for 循环。
+**resolution**：`verified`
 
-**判据**：
-- 实验①的 16 测试在迁移后全部通过
-- 不再需要"注册流专属的字段映射胶水"，全靠 inputMap
+**evidence**：
+- 实验①已迁移到 `@assemflow/core.assemble()`：`experiments/exp01-sweet-spot/src/assemble.ts` 直接调引擎
+- `experiments/exp01-sweet-spot/src/blocks/register.ts` 用 `BlockRegistry` 注册 5 个块（含 email-validator 异常短路包装、user-store 扁平化契约）
+- 配置 `src/configs/register.jsonc` 每步显式声明 `inputMap`，不再是接线胶水
+- 迁移后 exp01 的 16 测试全过、typecheck 0 错误；`npx tsx src/assemble.ts` 端到端跑通
+- 引擎相应扩展 2 处：execute 加 try-catch（异常短路）、checkConfig 接受 initialInput；engine 测试 13 → 17，全过
 
-**依赖**：可能需要扩展引擎（如更灵活的 inputMap 表达）。
+**resolvedAt**：2026-06-26
+
+**局限（仍待验证）**：
+- inputMap 表达力仍受限：不支持嵌套对象构造、不支持默认值。本次靠"扁平化块契约 + initialInput 注入种子"绕开
+- 引擎尚未支持流签名（FlowConfig.inputs schema）——initialInput 字段只做"存在性"检查、不做类型校验
+- 仍未验证 Q-002（配置驱动复用）和 Q-003（AI 产配置）
 
 ---
 
@@ -471,7 +479,59 @@
 
 ---
 
-## 维护规则
+## Q-024 · inputMap 表达力受限 · 🟡
+
+**问题**：引擎当前的 `inputMap` 只支持"字段重命名"（`{blockField: contextKey}`）。三件常见事都做不到：
+1. 构造嵌套对象（例如 `{newUser.email: "email"}`）
+2. 默认值（例如某个字段在上下文不存在时回退到 `[]` 或常量）
+3. 字面常量（例如把 `action` 写死为 `"register"`）
+
+**为什么重要**：表达力不足时，要么"扁平化块契约把业务字段塞进块"，要么"在 initialInput / params 里塞 hack 种子"——两种都把 ergonomic 缺口推给业务侧，违反"配置即接线"的纪律。
+
+**状态**：`open`
+
+**当前已绕开方式**（实验①迁移期间）：
+- `user-store` 扁平化（输入从 `{users, newUser: User}` 改成 `{users, email, passwordHash}`）
+- `users/sent/logs` 在 `initialInput` 里注入 `[]` 作种子
+- `auditAction` 写死在 `params` 里当字面常量
+
+**验证思路**：扩展 `StepConfig.inputMap` 的值语法。最小可行方案：
+```ts
+inputMap?: Record<string, string | { from?: string; default?: unknown; value?: unknown }>
+```
+- `string`：当前行为，重命名
+- `{ from }`：等价于 `string`
+- `{ from, default }`：找不到时用默认值
+- `{ value }`：字面常量
+- 嵌套对象构造：用点号路径（`"newUser.email": "email"`）或单独的 `compose` 字段
+
+**判据**：实验①能撤掉 user-store 扁平化、撤掉 initialInput 种子、把 `auditAction` 用字面常量写在 inputMap 里——配置变得更显式、块契约更纯。
+
+**依赖**：无；可独立推进。
+
+---
+
+## Q-025 · 流签名（FlowConfig 的入参契约）未定义 · 🟡
+
+**问题**：`assemble(config, registry, initialInput)` 的 `initialInput` 是裸 `Record<string, unknown>`，没有 schema、没有类型校验。`checkConfig` 现在能识别 initialInput 的"字段存在性"，但不知道字段类型——只能等到运行时 Ajv 在第一个用它的块入口处兜底。
+
+**为什么重要**：流也应该有自己的"对外契约"——和块契约同等公民。否则 AFP 的"强契约"承诺只兑现到块级，流级是空的。
+
+**状态**：`open`
+
+**验证思路**：给 `FlowConfig` 加可选字段：
+```ts
+inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
+```
+`assemble` 在调用前用 Ajv 校验 `initialInput` 是否符合 `flow.inputs`。`checkConfig` 用 `inputs` 的 properties 喂给 available（取代当前从裸 `Record` 取 keys）。
+
+**判据**：实验①的 `RegisterInput` 能从 TS 接口升级成配置里声明的 `inputs` schema，类型不匹配时装配前就报错。
+
+**依赖**：Q-024（一起做更顺手）。
+
+---
+
+
 
 - 任何新出现的待解决/待验证问题，**当场登记**到本文件，不能只在对话里说一句"先记下"。
 - 每条问题必须有：分级、状态、验证思路、判据、依赖。少一项不收。

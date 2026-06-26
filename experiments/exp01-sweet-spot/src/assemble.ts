@@ -1,37 +1,39 @@
 /**
- * 【拼装脚本】真正按配置的 steps 驱动执行
+ * 【拼装脚本】真正跑在 engine.assemble() 上的版本
  * ────────────────────────────────────────────────────────────
- * 修复前的问题：steps 数组是摆设，执行顺序是硬编码的。
- * 修复后：脚本读配置 → 按 steps 遍历 → 根据块名动态调用对应函数。
- * 如果 steps 是空的或者顺序变了，行为就会跟着变——这才是"配置驱动装配"。
+ * 旧版本：自己写了一个 mini-registry，按 steps 遍历 + 调本地函数。
+ * 这版：直接调 @assemflow/core 的 assemble()，复用引擎的：
+ *   - Ajv 输入/输出双契约校验
+ *   - checkConfig 静态校验（悬空引用 / 契约对齐 / 死配置）
+ *   - 异常短路（块抛 Error → AssembleResult.error）
+ *
+ * 这层薄薄的封装做了两件事：
+ *   1. 把 JSONC 配置读上来（去掉行注释后 JSON.parse）
+ *   2. 给 initialInput 补几个空数组（users/sent/logs），让 inputMap 在第一次跑时就能取到
+ *
+ * 第 2 点暴露了引擎当前的能力缺口：inputMap 不支持"找不到时默认值"。
+ * 这是个 ergonomic 缺口，不是正确性问题——业务侧用 initialInput 兜底足够。
  */
 
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { emailValidate } from "./blocks/email-validator.js";
-import { hashPassword } from "./blocks/password-hasher.js";
-import { storeUser } from "./blocks/user-store.js";
-import { notify } from "./blocks/notifier.js";
-import { appendAuditLog } from "./blocks/audit-logger.js";
 
-// ── 块注册表（块名 → 执行函数）────────────────────────────
-const blockRegistry: Record<string, (input: Record<string, unknown>) => unknown> = {
-  "email-validator": (ctx) => emailValidate({ email: ctx["email"] as string }),
-  "password-hasher": (ctx) => hashPassword({ password: ctx["password"] as string, salt: ctx["salt"] as string }),
-  "user-store": (ctx) => storeUser({ users: (ctx["users"] ?? []) as Array<{ email: string; passwordHash: string }>, newUser: { email: ctx["email"] as string, passwordHash: (ctx["hash"] as string) ?? "" } }),
-  "notifier": (ctx) => notify({ sent: (ctx["sent"] ?? []) as Array<{ channel: "email" | "sms"; to: string; message: string }>, channel: ctx["notifyChannel"] as "email" | "sms", to: ctx["email"] as string, message: ctx["notifyMessage"] as string }),
-  "audit-logger": (ctx) => appendAuditLog({ logs: (ctx["logs"] ?? []) as Array<{ timestamp: string; action: string; detail: string }>, timestamp: ctx["timestamp"] as string, action: "register", detail: ctx["email"] as string }),
-};
+// 跨包深路径 import：等 @assemflow/core 发布或加 path alias 后再改。
+import { assemble, type AssembleResult } from "../../../engine/src/index.js";
+import type { FlowConfig } from "../../../engine/src/index.js";
 
-// ── 读配置 ──────────────────────────────────────────────────
-function loadConfig(path: string) {
+import { createRegistry } from "./blocks/register.js";
+
+// ── 配置读取 ────────────────────────────────────────────────
+function loadConfig(path: string): FlowConfig {
   const raw = readFileSync(path, "utf-8");
+  // 简化版 JSONC：只剥行注释，不处理块注释（教学够用）
   const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
-  return JSON.parse(stripped);
+  return JSON.parse(stripped) as FlowConfig;
 }
 
-// ── 执行装配流 ──────────────────────────────────────────────
+// ── 调用者面向的输入 ─────────────────────────────────────────
 export interface RegisterInput {
   email: string;
   password: string;
@@ -39,48 +41,40 @@ export interface RegisterInput {
   timestamp: string;
 }
 
+// 兼容旧 API：RegisterResult 形状保持不变，方便 smoke 测试断言点不动
 export interface RegisterResult {
   success: boolean;
   error?: string;
   context: Record<string, unknown>;
 }
 
+/**
+ * 装配并运行注册流。
+ *
+ * 流程：读配置 → 构造注册表 → 注入初始上下文 → 调 engine.assemble()。
+ */
 export function assembleAndRun(configPath: string, input: RegisterInput): RegisterResult {
   const config = loadConfig(configPath);
+  const registry = createRegistry();
 
-  // 上下文 = 配置参数 + 调用方输入
-  const context: Record<string, unknown> = {
-    ...(config.params ?? {}),
+  // initialInput = 调用方业务输入 + 三个累积数组的种子。
+  // 引擎会把 params 和 initialInput 合并作为初始上下文。
+  const initialInput: Record<string, unknown> = {
     ...input,
+    users: [],
+    sent: [],
+    logs: [],
   };
 
-  // 关键：按 config.steps 遍历——顺序、数量都由配置决定
-  for (const step of config.steps) {
-    const blockName: string = step.block;
-    const blockFn = blockRegistry[blockName];
-
-    if (!blockFn) {
-      return { success: false, error: `块 "${blockName}" 未注册`, context };
-    }
-
-    // 执行块，把输出摊平到上下文
-    const output = blockFn(context);
-    if (typeof output === "object" && output !== null) {
-      for (const [k, v] of Object.entries(output as Record<string, unknown>)) {
-        context[k] = v;
-      }
-    }
-
-    // 如果块返回了 valid: false，中断流程（校验失败）
-    if ("valid" in (output as Record<string, unknown>) && (output as Record<string, unknown>)["valid"] === false) {
-      return { success: false, error: (output as Record<string, unknown>)["errorCode"] as string, context };
-    }
-  }
-
-  return { success: true, context };
+  const result: AssembleResult = assemble(config, registry, initialInput);
+  return {
+    success: result.success,
+    error: result.error,
+    context: result.context,
+  };
 }
 
-// ── 直接运行 ────────────────────────────────────────────────
+// ── 直接运行（npm run assemble）────────────────────────────
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isDirectRun = process.argv[1]?.includes("assemble");
 if (isDirectRun) {

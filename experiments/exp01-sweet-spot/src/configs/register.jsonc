@@ -3,28 +3,61 @@
 // 这是一份 AFP 配置：声明式地定义"哪些块按什么顺序接起来"。
 // 没有任何算法/逻辑——只有引用和常量。
 //
-// 引擎（这里用 assemble.ts 模拟）读这份配置，按顺序把块串起来执行。
+// 引擎（@assemflow/core 的 assemble()）读这份配置，按 steps 顺序执行每个块。
+// 每步的 inputMap 把"块需要的字段名"映射到"上下文里的字段名"——
+// 这是 AFP 真正的接线动作：声明数据从哪流向哪。
+//
 // 改了这里的值（比如 notifyChannel 从 email 改成 sms），
 // 不需要改任何块的代码，行为就变了——这正是实验①要证明的核心。
 {
   "flowName": "user-register",
 
-  // 流程步骤：按顺序执行这些块
+  // 流程步骤：按顺序执行；每步用 inputMap 显式声明数据接线
   "steps": [
-    { "block": "email-validator" },
-    { "block": "password-hasher" },
-    { "block": "user-store" },
-    { "block": "notifier" },
-    { "block": "audit-logger" }
+    {
+      "block": "email-validator",
+      "inputMap": { "email": "email" }
+    },
+    {
+      "block": "password-hasher",
+      "inputMap": { "password": "password", "salt": "salt" }
+    },
+    {
+      "block": "user-store",
+      "inputMap": {
+        "users": "users",
+        "email": "email",
+        "passwordHash": "hash"
+      }
+    },
+    {
+      "block": "notifier",
+      "inputMap": {
+        "sent": "sent",
+        "channel": "notifyChannel",
+        "to": "email",
+        "message": "notifyMessage"
+      }
+    },
+    {
+      "block": "audit-logger",
+      "inputMap": {
+        "logs": "logs",
+        "timestamp": "timestamp",
+        "action": "auditAction",
+        "detail": "email"
+      }
+    }
   ],
 
-  // 配置参数：这些值会被拼装脚本读取，注入到对应块的输入里
+  // 配置参数：注入到上下文，被 inputMap 引用
   "params": {
-    // 通知渠道：email 或 sms。这是枚举路由——简单二选一，允许留在配置里。
+    // 通知渠道：email 或 sms。简单二选一路由，允许留在配置里（有限枚举）。
     // 改这一个值就能切换行为，不碰任何块。
     "notifyChannel": "email",
-
     // 通知消息模板
-    "notifyMessage": "欢迎注册！"
+    "notifyMessage": "欢迎注册！",
+    // 审计 action 名（这条流的语义标签）
+    "auditAction": "register"
   }
 }

@@ -63,8 +63,16 @@
 **甜区假设为真。** 在"注册"这类结构稳定的流程上，只改配置就能改行为，不用碰装配块代码。
 
 证据：
-- 15 个测试全过（5 个属性测试验证确定性 + 4 条冒烟验证核心假设）
+- 16 个测试全过（5 个属性测试验证确定性 + 5 条冒烟验证核心假设 + 6 条块级单元）
 - 核心冒烟第 2 条：配置里 notifyChannel 从 email 改成 sms，没动任何块代码，通知渠道就变了
+- **2026-06-26 升级**：已迁移到 `@assemflow/core` 的 `assemble()`——拼装脚本不再自带 mini-registry，真正经过引擎的 Ajv 输入/输出双契约校验、checkConfig 静态分析、异常短路。`npx tsx src/assemble.ts` 可直接跑通端到端。
+
+迁移中暴露并补上的引擎缺口：
+- 引擎 execute 缺 try-catch → 已补（块抛异常 → AssembleResult.error）
+- checkConfig 静态分析只认 params、不认运行时入参 → 已补（接受可选 initialInput）
+
+迁移中绕开但未根治的引擎缺口（记录在 docs/open-questions.md）：
+- inputMap 只能"重命名"、不能构造嵌套对象或提供默认值 → 用扁平化 user-store 契约 + initialInput 初始化空数组绕开
 
 局限（诚实标出没验证的）：
 - 没测条件分支（本流是纯线性）

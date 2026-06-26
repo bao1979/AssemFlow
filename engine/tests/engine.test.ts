@@ -228,3 +228,99 @@ describe("assemble · 输出校验", () => {
     expect(result.error).toContain("输出校验失败");
   });
 });
+
+describe("check · initialInput 字段", () => {
+  it("inputMap 引用 initialInput 里的字段时不再误判为悬空", () => {
+    const reg = new BlockRegistry();
+    reg.register(greetBlock);
+
+    const config: FlowConfig = {
+      flowName: "with-runtime-input",
+      steps: [{ block: "greet", inputMap: { name: "userName" } }],
+      // userName 不在 params 里，但运行时从 initialInput 来
+    };
+
+    // 不传 initialInput：报悬空错
+    const diag1 = checkConfig(config, reg);
+    expect(diag1.some((d) => d.level === "error" && d.message.includes("userName"))).toBe(true);
+
+    // 传 initialInput：通过
+    const diag2 = checkConfig(config, reg, { userName: "bob" });
+    expect(diag2).toEqual([]);
+  });
+
+  it("被 initialInput 覆盖的 params key 不算死配置", () => {
+    const reg = new BlockRegistry();
+    reg.register(greetBlock);
+
+    const config: FlowConfig = {
+      flowName: "override-test",
+      steps: [{ block: "greet", inputMap: { name: "userName" } }],
+      params: { userName: "default" },
+    };
+
+    // initialInput 覆盖 userName，没有 inputMap 直接引用同名 params，但被覆盖也算"用了"
+    const diag = checkConfig(config, reg, { userName: "override" });
+    expect(diag.filter((d) => d.message.includes("死配置"))).toHaveLength(0);
+  });
+});
+
+describe("assemble · 异常短路", () => {
+  it("块抛异常时引擎不崩，返回 failure + 错误信息", () => {
+    const reg = new BlockRegistry();
+
+    const throwBlock: BlockDef = {
+      name: "thrower",
+      inputSchema: Type.Object({}),
+      outputSchema: Type.Object({ ok: Type.Boolean() }),
+      execute: () => {
+        throw new Error("biz_short_circuit");
+      },
+    };
+    reg.register(throwBlock);
+
+    const config: FlowConfig = {
+      flowName: "throw-flow",
+      steps: [{ block: "thrower" }],
+    };
+
+    const result = assemble(config, reg);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("thrower");
+    expect(result.error).toContain("biz_short_circuit");
+  });
+
+  it("第一步抛异常时，后续步骤不再执行", () => {
+    const reg = new BlockRegistry();
+    let secondRan = false;
+
+    const throwBlock: BlockDef = {
+      name: "thrower",
+      inputSchema: Type.Object({}),
+      outputSchema: Type.Object({}),
+      execute: () => {
+        throw new Error("stop");
+      },
+    };
+    const sideEffectBlock: BlockDef = {
+      name: "side",
+      inputSchema: Type.Object({}),
+      outputSchema: Type.Object({}),
+      execute: () => {
+        secondRan = true;
+        return {};
+      },
+    };
+    reg.register(throwBlock);
+    reg.register(sideEffectBlock);
+
+    const config: FlowConfig = {
+      flowName: "short-circuit",
+      steps: [{ block: "thrower" }, { block: "side" }],
+    };
+
+    const result = assemble(config, reg);
+    expect(result.success).toBe(false);
+    expect(secondRan).toBe(false);
+  });
+});

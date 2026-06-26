@@ -44,7 +44,11 @@ function isTypeCompatible(outputField: TSchema, inputExpected: TSchema): boolean
   return outputType === inputType;
 }
 
-export function checkConfig(config: FlowConfig, registry: BlockRegistry): Diagnostic[] {
+export function checkConfig(
+  config: FlowConfig,
+  registry: BlockRegistry,
+  initialInput?: Record<string, unknown>,
+): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
 
   // ── 1. 悬空引用 ──────────────────────────────────────────
@@ -62,14 +66,22 @@ export function checkConfig(config: FlowConfig, registry: BlockRegistry): Diagno
   // 如果有悬空引用，后续分析无意义
   if (diagnostics.some((d) => d.level === "error")) return diagnostics;
 
-  // ── 构建"上下文可用字段"：params + 前面步骤的输出 ────────
-  // 记录每个字段名 → 来源步骤 + 类型 schema
+  // ── 构建"上下文可用字段"：params + initialInput + 前面步骤的输出 ──
+  // 记录每个字段名 → 来源 + 类型 schema
   const available = new Map<string, { source: string; schema: TSchema }>();
 
   // params 里的字段（类型未知，标为宽松）
   if (config.params) {
     for (const key of Object.keys(config.params)) {
       available.set(key, { source: "params", schema: {} as TSchema });
+    }
+  }
+
+  // 运行时入参字段（assemble 调用方传入的 initialInput）
+  // 静态分析不知道这些字段的类型，只知道存在性——足以让 inputMap 通过悬空检查
+  if (initialInput) {
+    for (const key of Object.keys(initialInput)) {
+      available.set(key, { source: "initialInput", schema: {} as TSchema });
     }
   }
 
@@ -129,6 +141,8 @@ export function checkConfig(config: FlowConfig, registry: BlockRegistry): Diagno
     }
 
     for (const paramKey of Object.keys(config.params)) {
+      // 排除被 initialInput 覆盖的 key（它在 assemble 里会被运行时输入盖掉，不算死）
+      if (initialInput && paramKey in initialInput) continue;
       if (!usedKeys.has(paramKey)) {
         diagnostics.push({
           level: "warning",

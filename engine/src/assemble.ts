@@ -31,8 +31,8 @@ export function assemble(
   registry: BlockRegistry,
   initialInput?: Record<string, unknown>,
 ): AssembleResult {
-  // 先做静态校验
-  const diagnostics = checkConfig(config, registry);
+  // 先做静态校验（把 initialInput 也喂进去，否则运行时字段会被误判为悬空）
+  const diagnostics = checkConfig(config, registry, initialInput);
   const errors = diagnostics.filter((d) => d.level === "error");
   if (errors.length > 0) {
     return { success: false, context: {}, error: errors.map((e) => e.message).join("; ") };
@@ -72,8 +72,20 @@ export function assemble(
       };
     }
 
-    // 执行块
-    const output = block.execute(blockInput) as Record<string, unknown>;
+    // 执行块（用 try-catch 兜底：块可以用 throw 表达"业务短路"或异常情况，
+    // 引擎不区分错误来源，统一转成 AssembleResult.error。这是 MVP 必备的鲁棒性——
+    // 否则一个块抛会让整个引擎崩，调用方拿不到诊断信息。）
+    let output: Record<string, unknown>;
+    try {
+      output = block.execute(blockInput) as Record<string, unknown>;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return {
+        success: false,
+        context,
+        error: `块 "${block.name}" 执行抛出异常: ${msg}`,
+      };
+    }
 
     // 用 Ajv 校验输出是否符合块声明的 outputSchema（强契约的运行时保障）
     const validateOutput = ajv.compile(block.outputSchema);

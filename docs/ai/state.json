@@ -1,10 +1,10 @@
 {
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
-  "updatedAt": "2026-06-25",
+  "updatedAt": "2026-06-26",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个验证实验全部完成，核心假设验证通过，边界已划清。引擎 MVP 已实现。",
-  "phase": "研究验证-全部实验完成",
-  "note": "三个实验全部完成且修复了五条审计问题：①实验①现在真正按 steps 驱动装配（空 steps 不执行）②引擎 assemble 补了输出校验（输出不符 schema 中断）③CLI check 接入真正的 checkConfig（需 --blocks 清单）④CLI 明确 assemble 只能通过库 API⑤实验① typecheck 通过。引擎 13 测试、实验① 16 测试全过。教程 11 课已完成。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个验证实验全部完成，核心假设验证通过，边界已划清。实验①已端到端跑在 engine.assemble() 上。",
+  "phase": "研究验证-引擎接管真实流",
+  "note": "Q-005 已 resolved：实验①迁移到 @assemflow/core.assemble()——拼装脚本删了 mini-registry，5 个块通过 BlockRegistry 注册，配置 inputMap 显式接线。迁移期间补了引擎 2 处缺口：execute try-catch（异常短路）+ checkConfig 接受 initialInput。engine 13→17 测试全过，exp01 16 测试全过，typecheck 0 错误。同时识别两个新议题 Q-024（inputMap 表达力）/ Q-025（流签名）。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -14,19 +14,19 @@
     "tech-stack": { "status": "Done", "notes": "全部定案（D-004~009/011）。详见 system-design.md。" },
     "engine": {
       "status": "InProgress",
-      "notes": "MVP 完成（13 测试全过）：check（悬空引用+契约对齐+死配置）、assemble（输入+输出双校验）、graph（Mermaid）、CLI（check 接入真校验，assemble 仅库 API）。待扩展：where-used。",
+      "notes": "MVP+：17 测试全过。check（悬空引用+契约对齐+死配置+initialInput 字段识别）、assemble（输入+输出双校验+execute try-catch 异常短路）、graph（线性 Mermaid）、CLI（check 接入真校验）。已被实验①端到端复用。待扩展：where-used、inputMap 表达力增强（Q-024）、流签名（Q-025）。",
       "submodules": {
-        "assembler": { "status": "Done", "notes": "按配置确定性拼装，Ajv 校验输入+输出双契约" },
-        "contract-validator": { "status": "Done", "notes": "输入校验+输出校验+步骤间契约对齐（check 静态）" },
-        "config-graph": { "status": "InProgress", "notes": "Mermaid 输出+死配置检测已做，where-used 待做" },
+        "assembler": { "status": "Done", "notes": "按配置确定性拼装，Ajv 输入+输出双契约，execute 异常短路转 AssembleResult.error" },
+        "contract-validator": { "status": "Done", "notes": "输入校验+输出校验+步骤间契约对齐+initialInput 字段识别" },
+        "config-graph": { "status": "InProgress", "notes": "线性 Mermaid + 死配置检测已做，where-used 待做" },
         "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" }
       }
     },
     "experiments": {
       "status": "Done",
-      "notes": "三个实验全部完成并通过审计修复。",
+      "notes": "三个实验全部完成。实验①已升级跑在 engine.assemble() 上。",
       "submodules": {
-        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。真正按 steps 驱动装配（审计修复后），16 测试全过，typecheck 通过。" },
+        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。已端到端跑在 @assemflow/core.assemble() 上（2026-06-26），16 测试全过、typecheck 通过、npx tsx 端到端可跑。" },
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。lodash 纯函数廉价封装跨流复用。" }
       }
@@ -42,17 +42,20 @@
     { "id": "D-008", "decision": "引擎库优先+薄 CLI；MVP check/assemble/graph；assemble 先运行时编排。" },
     { "id": "D-009", "decision": "配置可视化 MVP 用 Mermaid。" },
     { "id": "D-010", "decision": "文档体系 SSOT 模型。" },
-    { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" }
+    { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" },
+    { "id": "D-012", "decision": "块的业务校验失败通过 throw Error 表达；引擎统一 catch 转为 AssembleResult.error 实现短路。纯函数版本可继续返回 {valid, errorCode}，BlockDef 注册层做转换。" }
   ],
   "nextSteps": [
-    "引擎扩展：where-used 影响面分析",
+    "引擎能力扩展：Q-024 inputMap 表达力（嵌套构造/默认值/字面常量）+ Q-025 流签名 schema",
+    "引擎能力扩展：where-used 影响面分析",
     "产品化讨论：引擎打包发布 / 文档对外开放 / 英文 README",
     "或：演化验证实验（K-EVOL）"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。本字段仅列 open/in_progress。当前 open：Q-001~Q-020；已 resolved：Q-021~Q-023（三个核心实验已验证）。"
+    "详见 docs/open-questions.md。本字段仅列 open/in_progress。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025；已 resolved：Q-005、Q-021~Q-023。"
   ],
   "knownIssues": [
-    { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" }
+    { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },
+    { "id": "K-INPUTMAP", "issue": "inputMap 表达力受限，业务侧需用扁平化/initialInput 种子绕开（详见 Q-024）", "status": "open" }
   ]
 }
