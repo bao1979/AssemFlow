@@ -2,9 +2,9 @@
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
   "updatedAt": "2026-06-26",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（spec: paradigm-validation-sokoban）。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md，拆成 5 个 MVP spec）。",
   "phase": "范式验证-Sokoban 标的启动",
-  "note": "项目目标升级：不止验证 AFP 是否成立，而是寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer / 状态机 / ECS）。终极标的 Sokoban 经 Plucker518 选定，启动 spec `paradigm-validation-sokoban`（Requirements 起点）。前置议题登记 Q-026 K-STATE / Q-027 K-LOOP / Q-028 Sokoban。原 nextSteps 的产品化/演化暂缓。",
+  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。终极标的 Sokoban 已拆成 MVP 链并分文档落地：全局路线图 `docs/paradigm-validation-sokoban-roadmap.md`；5 个独立 spec `.kiro/specs/sokoban-mvp-{0..4}-*`（MVP-0 K-STATE 红绿灯 / MVP-1 走路含 K-LOOP / MVP-2 推箱子 / MVP-3 5关数据驱动 / MVP-4 maxMoves+撤销）。引擎以 Godot 为词汇参照（借 Scene/Resource/Input 映射，拒帧tick/Node继承/Signal）。AI 介入改为提示词自测包，不做自动验收。Requirements 已定稿待评审。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -26,19 +26,18 @@
     },
     "experiments": {
       "status": "InProgress",
-      "notes": "初始三实验完成。下一组验证沿 paradigm-validation-sokoban spec 推进：M1=K-STATE / M2=K-LOOP / M3=Sokoban。",
+      "notes": "初始三实验完成。下一组验证沿 paradigm-validation-sokoban spec 推进：MVP 链。",
       "submodules": {
         "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。已端到端跑在 @assemflow/core.assemble() 上。" },
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
-        "exp04-k-state": { "status": "Planned", "notes": "Q-026 K-STATE 验证：状态机最小实验（红绿灯/自动售货机）" },
-        "exp05-k-loop": { "status": "Planned", "notes": "Q-027 K-LOOP 验证：循环/事件驱动最小实验" },
-        "exp06-sokoban": { "status": "Planned", "notes": "Q-028 终极标的：Sokoban 网页游戏（spec: paradigm-validation-sokoban）" }
+        "exp04-k-state": { "status": "Planned", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 + 状态承载方案对比" },
+        "exp06-sokoban": { "status": "Planned", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路含 K-LOOP(Q-027)、MVP-2 推箱子、MVP-3 5关数据驱动、MVP-4 maxMoves+撤销。不单设 exp05。" }
       }
     },
     "spec-paradigm-validation-sokoban": {
       "status": "InProgress",
-      "notes": "起点 Requirements。验证 AFP / 混合范式在网格回合制游戏上的适配度，找出 AI agent 介入模式下的更优范式。"
+      "notes": "已拆分落地：全局路线图 docs/paradigm-validation-sokoban-roadmap.md + 5 个独立 MVP spec（.kiro/specs/sokoban-mvp-0..4）。各 spec Requirements 已定稿，0 lint 错误，待评审后逐个进入 Design。验证 AFP / 混合范式在网格回合制游戏上的适配度。"
     }
   },
   "decisions": [
@@ -56,9 +55,9 @@
     { "id": "D-013", "decision": "项目目标升级：从「证明 AFP 成立」转为「寻找 AI 介入模式下的更优编程范式」。允许混合 AFP + reducer/状态机/ECS/行为树等。终极验证标的 = Sokoban 网页游戏。" }
   ],
   "nextSteps": [
-    "spec `paradigm-validation-sokoban` Requirements 完稿 → 设计评审 → 进入 M1（K-STATE）实验",
-    "Q-024 inputMap 表达力增强（小工程，可并行推进，让后续配置更纯净）",
-    "M1 完成后开 M2 K-LOOP；M2 完成后开 M3 Sokoban"
+    "Sokoban MVP 链已分文档落地（路线图 + 5 spec）→ 评审 → 从 MVP-0（sokoban-mvp-0-k-state）进入 Design",
+    "Q-024 inputMap 表达力增强（小工程，可并行推进）",
+    "按 MVP 链推进：MVP-0 → MVP-1 → MVP-2 → MVP-3 → MVP-4"
   ],
   "openQuestions": [
     "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024~Q-028；已 resolved：Q-005、Q-021~Q-023。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"

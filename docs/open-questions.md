@@ -545,7 +545,7 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 
 **判据**：在不引入"全局可变状态"的前提下，哪种方案能让配置更可读、AI agent 更容易产/改、调试更容易。诚实记录"AFP 范式在这一形态下别扭的地方"。
 
-**依赖**：无；可独立启动。是 Q-028（Sokoban）的 M1 前置。
+**依赖**：无；可独立启动。归属 paradigm-validation-sokoban MVP-0。
 
 ---
 
@@ -553,42 +553,44 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 
 **问题**：当循环次数依赖运行时数据（游戏帧循环、事件队列消费、轮询、批处理）时，AFP 该怎么表达？现有红线"动态边界循环必须封进块"违背了"配置是接线"的承诺——把控制流推进块内部 = 在 sub-graph 里造一门很烂的编程语言。
 
-**为什么关键**：AFP 当前是 DAG，不是图灵完备控制流。任何需要主循环的程序在这里都憋住。是 Q-028 Sokoban 主循环的核心前置。
+**为什么关键**：AFP 当前是 DAG，不是图灵完备控制流。任何需要主循环的程序在这里都憋住。
 
 **状态**：`open`
 
-**验证思路**：做一个最小循环示例（轮询累加器 / 事件序列处理器），试两种方案：
-- **A. 主循环在外部**：调用方每次循环调一次 `assemble`，引擎保持纯 DAG
-- **B. 引擎支持 loop step**：`StepConfig.type = "loop"`，配置声明终止条件（基于已声明枚举字段或迭代器）
+**验证思路**：**不单设独立实验**——已决定并入 paradigm-validation-sokoban 的 MVP-1（走路），spec `.kiro/specs/sokoban-mvp-1-walk/`。Sokoban 的"按键→回合→渲染"循环本身就是 K-LOOP 的真实场景，比脱离场景的轮询累加器更有意义。在 MVP-1 中对比两方案：
+- **A. 主循环在外部**：调用方每次按键调一次 `assemble`，引擎保持纯 DAG
+- **B. 引擎支持 loop step**：`StepConfig.type = "loop"`，配置声明终止条件
 
-**判据**：两种方案在"配置可读性"、"AI agent 是否容易生成正确配置"、"`check` 静态分析是否仍能成立"三个维度上的得失。
+**判据**：两方案在"配置可读性"、"AI agent 是否容易生成正确配置"、"`check` 静态分析是否仍成立"三维度的得失。结论写进 exp06 的 MVP-1 报告。
 
-**依赖**：Q-026 K-STATE（状态先定型，因为循环必然带状态）。是 Q-028 的 M2 前置。
+**依赖**：Q-026 K-STATE（状态先定型）。归属 paradigm-validation-sokoban MVP-1。
 
 ---
 
 ## Q-028 · 范式验证终极标的：Sokoban · 🔴
 
-**问题**：AFP 在"网格回合制游戏"这一形态上能走多远？纯 AFP / 混合范式（AFP + reducer / 状态机 / ECS / 行为树）哪个能让 AI agent 介入开发最高效？
+**问题**：AFP 在"网格回合制游戏"这一形态上能走多远？纯 AFP / 混合范式（AFP + reducer / 状态机 / ECS）哪个能让 AI agent 介入开发最高效？
 
-**为什么关键**：项目目标已升级——不只验证 AFP 是否成立，而是寻找"**AI 介入模式下的更优编程范式**"。游戏是载体，真正产出是一套"人 + AI agent 协作开发"的工程范式。Sokoban 是这种验证的最纯净标的（每关一份 ASCII 数据 = AFP "AI 产配置"的天然舞台）。
+**为什么关键**：项目目标已升级（D-013）——不只验证 AFP 是否成立，而是寻找"AI 介入模式下的更优编程范式"。游戏是载体，真正产出是一套"人 + AI agent 协作开发"的工程范式 + AFP 适用域清单。Sokoban 是最纯净标的（每关一份 ASCII 数据 = AFP "AI 产配置"的天然舞台）。
 
 **状态**：`open`
 
-**验证思路**：分三个 milestone：
-- **M1**：解决 Q-026 K-STATE
-- **M2**：解决 Q-027 K-LOOP
-- **M3**：完整 Sokoban（基础玩法 + 撤销 + 关卡集 + AI 产关卡 demo + Canvas/DOM 渲染）
+**验证思路**：拆成一条 MVP 链。全局路线图见 `docs/paradigm-validation-sokoban-roadmap.md`；每个 MVP 是独立 spec：
+- **MVP-0**：K-STATE 红绿灯状态机（= Q-026）→ `.kiro/specs/sokoban-mvp-0-k-state/`
+- **MVP-1**：走路 + 渲染（含 K-LOOP = Q-027）→ `.kiro/specs/sokoban-mvp-1-walk/`
+- **MVP-2**：推箱子 + 胜利判定 → `.kiro/specs/sokoban-mvp-2-push/`
+- **MVP-3**：5 关 ASCII 关卡集 + 静态校验 → `.kiro/specs/sokoban-mvp-3-levels/`
+- **MVP-4**：maxMoves 配置开关 + 撤销 → `.kiro/specs/sokoban-mvp-4-tuning/`
 
-详细的子需求、范围、判据登记在 `.kiro/specs/paradigm-validation-sokoban/requirements.md`。
+引擎参照 Godot 的词汇（Scene/Resource/Input 映射），但拒绝其架构（帧 tick / Node 继承 / Signal）。
 
-**判据**（高层）：
-1. AI agent 能在 < N 轮对话里加一个"新关卡 / 新地形 / 新规则"且通过 check
-2. 改一处配置的影响面可被 `check` 静态算出
-3. 纯 AFP 走不通的地方，混合范式（reducer / 状态机 / ECS）的引入边界清晰、可文档化
-4. 最终产出的引擎可被复用到该家族里另一个游戏（贪吃蛇 / 2048 / 扫雷之一）
+**判据**：
+1. 加新关卡 = 加纯数据，引擎零改动（MVP-3）
+2. 一个配置值（maxMoves）改了行为就变，块零改动（MVP-4）
+3. 非 AFP 范式处全部带 `@paradigm` 标记，最终汇成 `docs/paradigm-comparison.md` 适用域清单
+4. AI 介入由提示词自测包（`docs/agent-test-prompts.md`）支撑，Plucker518 自行到大模型实测裁定，不做自动验收
 
-**依赖**：Q-026、Q-027。**不要**等 Q-001（演化）/ Q-002（配置驱动复用）/ Q-003（AI 产配置）—— Q-028 本身就是这三条的复合验证。
+**依赖**：Q-026、Q-027（即 MVP-0、MVP-1）。**不要**等 Q-001 / Q-002 / Q-003——本 spec 本身就是复合验证。
 
 ---
 
