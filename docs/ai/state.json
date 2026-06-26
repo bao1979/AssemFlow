@@ -2,34 +2,43 @@
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
   "updatedAt": "2026-06-26",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个验证实验全部完成，核心假设验证通过，边界已划清。实验①已端到端跑在 engine.assemble() 上。",
-  "phase": "研究验证-引擎接管真实流",
-  "note": "Q-005 已 resolved：实验①迁移到 @assemflow/core.assemble()——拼装脚本删了 mini-registry，5 个块通过 BlockRegistry 注册，配置 inputMap 显式接线。迁移期间补了引擎 2 处缺口：execute try-catch（异常短路）+ checkConfig 接受 initialInput。engine 13→17 测试全过，exp01 16 测试全过，typecheck 0 错误。同时识别两个新议题 Q-024（inputMap 表达力）/ Q-025（流签名）。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（spec: paradigm-validation-sokoban）。",
+  "phase": "范式验证-Sokoban 标的启动",
+  "note": "项目目标升级：不止验证 AFP 是否成立，而是寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer / 状态机 / ECS）。终极标的 Sokoban 经 Plucker518 选定，启动 spec `paradigm-validation-sokoban`（Requirements 起点）。前置议题登记 Q-026 K-STATE / Q-027 K-LOOP / Q-028 Sokoban。原 nextSteps 的产品化/演化暂缓。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
     "doc-governance": { "status": "Done", "notes": "SSOT 模型。" },
-    "tutorial": { "status": "Done", "notes": "全部 11 课已写完。直觉/上手/纪律与边界/理论深潜四部分完整。" },
+    "tutorial": { "status": "Done", "notes": "全部 11 课已写完。" },
     "ai-skills": { "status": "Done", "notes": "4 个 AFP 工作流 skills。" },
     "tech-stack": { "status": "Done", "notes": "全部定案（D-004~009/011）。详见 system-design.md。" },
     "engine": {
       "status": "InProgress",
-      "notes": "MVP+：17 测试全过。check（悬空引用+契约对齐+死配置+initialInput 字段识别）、assemble（输入+输出双校验+execute try-catch 异常短路）、graph（线性 Mermaid）、CLI（check 接入真校验）。已被实验①端到端复用。待扩展：where-used、inputMap 表达力增强（Q-024）、流签名（Q-025）。",
+      "notes": "MVP+：17 测试全过。已被实验①端到端复用。待扩展：状态机支持（Q-026）、循环 step（Q-027）、inputMap 表达力（Q-024）、流签名（Q-025）、where-used。",
       "submodules": {
-        "assembler": { "status": "Done", "notes": "按配置确定性拼装，Ajv 输入+输出双契约，execute 异常短路转 AssembleResult.error" },
-        "contract-validator": { "status": "Done", "notes": "输入校验+输出校验+步骤间契约对齐+initialInput 字段识别" },
-        "config-graph": { "status": "InProgress", "notes": "线性 Mermaid + 死配置检测已做，where-used 待做" },
-        "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" }
+        "assembler": { "status": "Done", "notes": "Ajv 输入+输出双契约，execute 异常短路" },
+        "contract-validator": { "status": "Done", "notes": "悬空+契约对齐+死配置+initialInput 字段识别" },
+        "config-graph": { "status": "InProgress", "notes": "线性 Mermaid + 死配置检测；where-used 待做" },
+        "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" },
+        "state-support": { "status": "Planned", "notes": "状态机/有状态块支持（Q-026 验证后定方案）" },
+        "loop-step": { "status": "Planned", "notes": "循环 step 支持（Q-027 验证后定方案）" }
       }
     },
     "experiments": {
-      "status": "Done",
-      "notes": "三个实验全部完成。实验①已升级跑在 engine.assemble() 上。",
+      "status": "InProgress",
+      "notes": "初始三实验完成。下一组验证沿 paradigm-validation-sokoban spec 推进：M1=K-STATE / M2=K-LOOP / M3=Sokoban。",
       "submodules": {
-        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。已端到端跑在 @assemflow/core.assemble() 上（2026-06-26），16 测试全过、typecheck 通过、npx tsx 端到端可跑。" },
+        "exp01-sweet-spot": { "status": "Done", "notes": "甜区假设为真。已端到端跑在 @assemflow/core.assemble() 上。" },
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
-        "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。lodash 纯函数廉价封装跨流复用。" }
+        "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
+        "exp04-k-state": { "status": "Planned", "notes": "Q-026 K-STATE 验证：状态机最小实验（红绿灯/自动售货机）" },
+        "exp05-k-loop": { "status": "Planned", "notes": "Q-027 K-LOOP 验证：循环/事件驱动最小实验" },
+        "exp06-sokoban": { "status": "Planned", "notes": "Q-028 终极标的：Sokoban 网页游戏（spec: paradigm-validation-sokoban）" }
       }
+    },
+    "spec-paradigm-validation-sokoban": {
+      "status": "InProgress",
+      "notes": "起点 Requirements。验证 AFP / 混合范式在网格回合制游戏上的适配度，找出 AI agent 介入模式下的更优范式。"
     }
   },
   "decisions": [
@@ -42,20 +51,22 @@
     { "id": "D-008", "decision": "引擎库优先+薄 CLI；MVP check/assemble/graph；assemble 先运行时编排。" },
     { "id": "D-009", "decision": "配置可视化 MVP 用 Mermaid。" },
     { "id": "D-010", "decision": "文档体系 SSOT 模型。" },
-    { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。封装是设计期能力，非运行期引擎职责。" },
-    { "id": "D-012", "decision": "块的业务校验失败通过 throw Error 表达；引擎统一 catch 转为 AssembleResult.error 实现短路。纯函数版本可继续返回 {valid, errorCode}，BlockDef 注册层做转换。" }
+    { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。" },
+    { "id": "D-012", "decision": "块的业务校验失败通过 throw Error 表达；引擎统一 catch 转为 AssembleResult.error。" },
+    { "id": "D-013", "decision": "项目目标升级：从「证明 AFP 成立」转为「寻找 AI 介入模式下的更优编程范式」。允许混合 AFP + reducer/状态机/ECS/行为树等。终极验证标的 = Sokoban 网页游戏。" }
   ],
   "nextSteps": [
-    "引擎能力扩展：Q-024 inputMap 表达力（嵌套构造/默认值/字面常量）+ Q-025 流签名 schema",
-    "引擎能力扩展：where-used 影响面分析",
-    "产品化讨论：引擎打包发布 / 文档对外开放 / 英文 README",
-    "或：演化验证实验（K-EVOL）"
+    "spec `paradigm-validation-sokoban` Requirements 完稿 → 设计评审 → 进入 M1（K-STATE）实验",
+    "Q-024 inputMap 表达力增强（小工程，可并行推进，让后续配置更纯净）",
+    "M1 完成后开 M2 K-LOOP；M2 完成后开 M3 Sokoban"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。本字段仅列 open/in_progress。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025；已 resolved：Q-005、Q-021~Q-023。"
+    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024~Q-028；已 resolved：Q-005、Q-021~Q-023。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },
-    { "id": "K-INPUTMAP", "issue": "inputMap 表达力受限，业务侧需用扁平化/initialInput 种子绕开（详见 Q-024）", "status": "open" }
+    { "id": "K-INPUTMAP", "issue": "inputMap 表达力受限（详见 Q-024）", "status": "open" },
+    { "id": "K-STATE", "issue": "AFP 不能描述长寿命有状态对象（详见 Q-026）", "status": "open" },
+    { "id": "K-LOOP", "issue": "AFP 不能描述动态边界循环（详见 Q-027）", "status": "open" }
   ]
 }
