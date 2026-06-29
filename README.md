@@ -4,15 +4,39 @@
 
 # AssemFlow · 装配流编程
 
-> **装配流编程（Assembly Flow Programming, AFP）**——一种 AI 时代的编程范式：用可复用的"装配块"，经"转接件"按"配置"驱动、对"数据"操作，装配成业务的"装配流"。**AI 负责发现与配置，引擎负责确定性执行。**
+> 一个正在验证中的研究项目：**在 AI 时代，能不能把"AI 负责发现与配置、引擎负责确定性执行"这条纪律，做成一种可复现、可审计的编程范式？**
 
-AssemFlow 不是"AI 编程助手"，而是**业务蓝图的 CAD 工具 + 确定性编译器**。它与近邻划清边界：低代码"隐藏复杂度"，AFP"显式化复杂度并交给图去管"；vibe coding"让 AI 猜"，AFP"让 AI 填图"。
+**当前阶段：研究稿 v0.1 · 范式验证中（非生产承诺）。** 我们正在用「推箱子（Sokoban）」这个全民熟知的小游戏，诚实地压测这个想法在哪里成立、在哪里崩。**欢迎围观、质疑、参与**——下面有适合上手的任务。
 
-## 核心理念
+---
 
-AFP 的唯一楔子是**确定性纪律**：把 LLM 严格限定在"发现 + 配置 + 适配"一侧（设计期、有人审），把"执行"留在确定性纯代码一侧（运行期、零 AI）。这换来可复现、可审计、可治理——别人不愿守的纪律。
+## 30 秒了解：这是什么、为什么可能重要
 
-## 五元构件
+主流 AI 编程是"让 AI 猜整段代码"（vibe coding），结果不可复现、难审计。AFP 换一条路：
+
+> 把 LLM 严格关在**设计期**的"发现 + 配置 + 适配"一侧（有人审），把**运行期**的"执行"留在确定性纯代码一侧（**零 AI**）。
+
+换来的是可复现、可审计、可治理——代价是一套别人不愿守的纪律。AssemFlow 不是"AI 编程助手"，而是**业务蓝图的 CAD 工具 + 确定性编译器**。这个想法**可能成立、也可能在某些场景崩**，本项目的产出就是这份诚实的边界清单。
+
+## 现在能摸到什么（约 1 分钟）
+
+> 诚实说明：**可玩的 Sokoban demo 还没做出来**（见下方路线图，它是我们的"发表闸口"）。现在能跑的是引擎和四个验证实验。
+
+```powershell
+# 跑引擎：静态校验 + 确定性装配 + Mermaid 配置图
+cd engine
+npm install
+npm test
+
+# 跑一个验证实验（甜区假设：用户注册流，改配置不改代码）
+cd ../experiments/exp01-sweet-spot
+npm install
+npm test
+```
+
+每个实验目录下都有 `README.md` / `REPORT.md`，记录它验证了什么、结论是什么、边界在哪。
+
+## 五元构件（术语锚点）
 
 | 构件 | 江河隐喻 | 身份 | 谁维护 |
 | :--- | :--- | :--- | :--- |
@@ -35,22 +59,38 @@ flowchart LR
     Engine --> Flow[装配流<br/>可复现 · 可审计]
 ```
 
-## 技术栈
+## 已有的证据链（四个实验）
 
-- 引擎：TypeScript（`@assemflow/core` 库 + 薄 CLI `assemflow check`/`graph`；`assemble` 仅库 API）
-- 契约：TypeBox（产 JSON Schema）+ Ajv 双校验（输入+输出）
-- 配置：JSON + JSON Schema（纯数据，物理上堵死"算法入配置"）
-- 测试：vitest + fast-check（属性测试验证装配块的确定性纯机制）
-- 可视化：Mermaid
+| 实验 | 问题 | 结论 | 详情 |
+| :--- | :--- | :--- | :--- |
+| 甜区 | AFP 在什么场景最贴？ | 假设为真，已端到端跑在引擎上 | `experiments/exp01-sweet-spot/` |
+| 边界 | 什么场景不该用 AFP？ | 条件密集的规则变更不在甜区 | `experiments/exp02-boundary/` |
+| 封装+复用 | 块能否干净封装并跨流复用？ | 假设为真 | `experiments/exp03-wrap-reuse/` |
+| 状态承载（MVP-0） | 长寿命状态存哪里？ | 阶段性默认"调用方持久化（A）" | `experiments/exp04-k-state/REPORT.md` |
 
-## 当前状态
+## 路线图：用 Sokoban 把想法压到底
 
-三个验证实验全部完成（甜区✅ 边界✅ 封装+复用✅），引擎 MVP 已实现（13 测试），教程 11 课已写。详细进度见 [`docs/ai/state.json`](docs/ai/state.json)。
+我们把验证拆成一条 **MVP 链**，每步独立可交付、可单独得结论、可随时中止。全局地图见 [`docs/paradigm-validation-sokoban-roadmap.md`](docs/paradigm-validation-sokoban-roadmap.md)。
+
+| MVP | 主题 | 状态 |
+| :--- | :--- | :--- |
+| MVP-0 | 状态机（红绿灯）状态承载对比 | ✅ 已完成 |
+| MVP-1 | 走路 + 渲染 | 进行中 / 下一步 |
+| **MVP-2** | **推箱子 + 胜利判定** | **← 发表闸口：到这里有可玩 demo，正式对外发布** |
+| MVP-3 | 5 关 ASCII 关卡集（加关 = 加数据） | 🙋 留作社区任务 |
+| MVP-4 | maxMoves 开关 + 撤销 | 🙋 留作社区任务 |
+
+## 想参与？这里有适合上手的事
+
+- **🙋 加一关（最佳上手任务）**：MVP-3 的设计就是"加一关 = 加一份 ASCII 数据，引擎零改动"。这既是帮我们验证 AFP 甜区，也是最轻的 onboarding。等 MVP-2 落地后会开成 `good first issue`。
+- **🤖 拿大模型实测**：我们最缺"AI agent 在这套结构里到底好不好用"的真实数据。届时会提供一份提示词自测包（`docs/agent-test-prompts.md`），欢迎拿你常用的模型跑一跑、反馈结果。
+- **🧐 质疑边界**：如果你觉得某个结论站不住、或某处该用别的范式，开 issue 直说。**"AFP 在 X 崩了"和"成立"同等有价值**——只要诚实。
+
+> 开源许可证与贡献指南正在筹备（见发表前 checklist）。在此之前欢迎以 issue / discussion 形式参与讨论。
 
 ## 文档导航
 
-- [教程（11 课）](docs/tutorial/README.md) —— 从零学 AFP，由浅入深
 - [可行性分析](docs/装配流编程-可行性分析.md) —— 范式的先例扫描与可行性论证
-- [系统设计](docs/ai/system-design.md) —— 架构、目录、技术栈论证
-- [项目状态](docs/ai/state.json) —— 进度、决策、下一步（单一真相源）
-- 范式纪律（宪法）：`.kiro/steering/afp-core.md`
+- [教程（11 课）](docs/tutorial/README.md) —— 从零学 AFP
+- [Sokoban 验证路线图](docs/paradigm-validation-sokoban-roadmap.md) —— 全局地图与 MVP 链
+- [系统设计](docs/ai/system-design.md) · [项目状态（SSOT）](docs/ai/state.json) · 范式纪律（宪法）`.kiro/steering/afp-core.md`
