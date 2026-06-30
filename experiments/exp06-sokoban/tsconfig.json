@@ -1,0 +1,20 @@
+{
+  // AFP 实验⑥ 的 TypeScript 配置。对齐 exp01：ESM + strict 全开。
+  // 与 exp01 的唯一差异：本实验含浏览器渲染/主循环（render.ts / main.ts）与 jsdom 测试，
+  // 故 lib 追加 "DOM"，让 HTMLElement / document / keydown 等浏览器类型可用。
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "tests"]
+}

@@ -1,6 +1,6 @@
 {
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
-  "updatedAt": "2026-06-29",
+  "updatedAt": "2026-06-30",
   "project": "AssemFlow",
   "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md，拆成 5 个 MVP spec）。",
   "phase": "范式验证-Sokoban 标的启动",
@@ -21,7 +21,7 @@
         "config-graph": { "status": "InProgress", "notes": "线性 Mermaid + 死配置检测；where-used 待做" },
         "dependency-allowlist": { "status": "Planned", "notes": "依赖白名单机制待集成进引擎" },
         "state-support": { "status": "Planned", "notes": "状态机/有状态块支持。MVP-0（Q-026）已出阶段性默认：默认起点选 A（调用方持久化，引擎不变），非终局；B（引擎承载状态）的 reset/快照/隔离待 MVP-1 复审后再定是否做" },
-        "loop-step": { "status": "Planned", "notes": "循环 step 支持（Q-027 验证后定方案）" }
+        "loop-step": { "status": "Planned", "notes": "Q-027 结论：回合制下选外部主循环、引擎无需一等 loop step（MVP-1 走路全程未被卡住）；本阶段不实现。更复杂场景（引擎驱动的批量/自动推进）出现真实需求再评估。" }
       }
     },
     "experiments": {
@@ -32,12 +32,12 @@
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
         "exp04-k-state": { "status": "Done", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 A/B 状态承载对比，typecheck 0 错、16 测试全过、A 路端到端跑通。阶段性默认起点选 A（调用方持久化），非终局、待 MVP-1 大状态复审。详见 experiments/exp04-k-state/REPORT.md" },
-        "exp06-sokoban": { "status": "Planned", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路含 K-LOOP(Q-027)、MVP-2 推箱子、MVP-3 5关数据驱动、MVP-4 maxMoves+撤销。不单设 exp05。" }
+        "exp06-sokoban": { "status": "InProgress", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路已落地（typecheck 0 错 / 45 测试全过；K-LOOP=外部主循环、引擎无需 loop step；方案 A 沿用未触发复审）；REPORT 见 experiments/exp06-sokoban/REPORT.md。MVP-2 推箱子、MVP-3 5关数据驱动、MVP-4 maxMoves+撤销仍待做。不单设 exp05。" }
       }
     },
     "spec-paradigm-validation-sokoban": {
       "status": "InProgress",
-      "notes": "已拆分落地：全局路线图 docs/paradigm-validation-sokoban-roadmap.md + 5 个独立 MVP spec（.kiro/specs/sokoban-mvp-0..4）。各 spec Requirements 已定稿，0 lint 错误，待评审后逐个进入 Design。验证 AFP / 混合范式在网格回合制游戏上的适配度。"
+      "notes": "已拆分落地：全局路线图 docs/paradigm-validation-sokoban-roadmap.md + 5 个独立 MVP spec（.kiro/specs/sokoban-mvp-0..4）。MVP-0、MVP-1 已落地实现（MVP-1 走路 + 浏览器可玩 demo + K-LOOP 结论交付）；MVP-2~4 Requirements 已定稿待逐个进入 Design。验证 AFP / 混合范式在网格回合制游戏上的适配度。"
     }
   },
   "decisions": [
@@ -57,17 +57,18 @@
   ],
   "nextSteps": [
     "发表策略已定（D-014）：发表闸口在 MVP-2，MVP-3/4 留社区。根 README 已改为对外门面版；发表前 checklist 见路线图。",
-    "MVP-0 已交付，得阶段性默认 A → 进入 MVP-1（sokoban-mvp-1-walk）Design，沿用 A 状态承载方案、验证 K-LOOP(Q-027)",
-    "推进 MVP-1 → MVP-2（发表线）；到 MVP-2 收尾时走发表前 checklist（含选 LICENSE、CONTRIBUTING、good-first-issue 拆分、可玩动图）",
-    "Q-024 inputMap 表达力增强（小工程，可并行推进，能让 MVP-1/3 配置更纯净）"
+    "MVP-1 走路已交付（K-LOOP 结论=外部主循环、方案 A 沿用）→ 进入 MVP-2（sokoban-mvp-2-push）推箱子 + 胜利判定 = 发表闸口",
+    "到 MVP-2 收尾时走发表前 checklist（含选 LICENSE、CONTRIBUTING、good-first-issue 拆分、可玩动图）",
+    "建议：补一次真人实时浏览器目视/截图签收 MVP-1 demo（REPORT 已标注此为唯一未留档的成色项）",
+    "Q-024 inputMap 表达力增强（小工程，可并行推进，能让 MVP-2/3 配置更纯净）"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025、Q-027、Q-028；in_progress：Q-026（MVP-0 完成，得阶段性默认 A，非终局）；已 resolved：Q-005、Q-021~Q-023。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"
+    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025、Q-028；in_progress：Q-026（MVP-0 完成，得阶段性默认 A，非终局）；已 resolved：Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景：主循环留外部、引擎守纯 DAG；更广义动态边界循环 deferred）。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },
     { "id": "K-INPUTMAP", "issue": "inputMap 表达力受限（详见 Q-024）", "status": "open" },
     { "id": "K-STATE", "issue": "AFP 不能描述长寿命有状态对象（详见 Q-026）", "status": "open" },
-    { "id": "K-LOOP", "issue": "AFP 不能描述动态边界循环（详见 Q-027）", "status": "open" }
+    { "id": "K-LOOP", "issue": "AFP 不能描述动态边界循环（详见 Q-027）。回合制事件驱动场景 MVP-1 已结案（resolved/avoided：主循环留外部、引擎守纯 DAG、未引入 loop step）；更广义的运行时数据驱动循环（帧/轮询/批处理/自动推进）deferred，出现真实需求再评估", "status": "deferred" }
   ]
 }

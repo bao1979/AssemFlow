@@ -561,7 +561,19 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 
 **为什么关键**：AFP 当前是 DAG，不是图灵完备控制流。任何需要主循环的程序在这里都憋住。
 
-**状态**：`open`
+**状态**：`resolved`（限定于回合制事件驱动场景；更广义动态边界循环 deferred，见下方 scope）
+
+**resolution**：`avoided`
+
+**evidence**：
+- 实验 `experiments/exp06-sokoban/` MVP-1 走路（spec `.kiro/specs/sokoban-mvp-1-walk/`）：`npm run typecheck` 0 错、`npx vitest run` 7 文件 45 测试全过（本轮真实输出）
+- K-LOOP 结论 + 全量状态穿透观察见 `experiments/exp06-sokoban/REPORT.md` 第一节
+- 读 `engine/src/assemble.ts` 确认引擎对 `config.steps` 仅单趟顺序遍历、无任何循环 / 迭代构造（纯 DAG）
+- 选「主循环在外部」：循环放浏览器 `keydown` 回调（`src/main.ts`），引擎只做"一次按键 = 一趟确定性 assemble"（`src/driver.ts`）；候选 B（引擎一等 loop step）未实现、引擎未为此修改
+
+**resolvedAt**：2026-06-30
+
+**scope / 仍 deferred**：本结论限定于**回合制离散事件驱动**场景——此处循环天然落在引擎外，引擎守住纯 DAG、`check` 静态可枚举性不受影响，故以 `avoided`（AFP 不把控制流塞进引擎、明确划在边界外）结案。**更广义的"动态边界循环"**（循环次数依赖运行时数据：帧循环、事件队列消费、轮询、批处理 / 引擎驱动的自动推进）**未被本 MVP 触及**，留待后续 MVP 出现真实需求时再评估是否需要引擎一等 loop step；在此之前不预造（最小范式原则）。state.json 的 `K-LOOP` 据此降为 `deferred` 残留项。
 
 **验证思路**：**不单设独立实验**——已决定并入 paradigm-validation-sokoban 的 MVP-1（走路），spec `.kiro/specs/sokoban-mvp-1-walk/`。Sokoban 的"按键→回合→渲染"循环本身就是 K-LOOP 的真实场景，比脱离场景的轮询累加器更有意义。在 MVP-1 中对比两方案：
 - **A. 主循环在外部**：调用方每次按键调一次 `assemble`，引擎保持纯 DAG
@@ -570,6 +582,13 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 **判据**：两方案在"配置可读性"、"AI agent 是否容易生成正确配置"、"`check` 静态分析是否仍成立"三维度的得失。结论写进 exp06 的 MVP-1 报告。
 
 **依赖**：Q-026 K-STATE（状态先定型）。归属 paradigm-validation-sokoban MVP-1。
+
+**实现期发现（MVP-1 走路完成 → 本条据此结案为 `resolved`/`avoided`，详见上方 resolution / scope）**：
+- 实验 `experiments/exp06-sokoban/` 的 MVP-1 部分已落地并通过验证（`npm run typecheck` 0 错、`npm test` 7 文件 45 测试全过）。K-LOOP 结论 + 全量状态穿透观察见 `experiments/exp06-sokoban/REPORT.md`。
+- **K-LOOP 选「主循环在外部」**：循环放在浏览器 `keydown` 事件回调（`src/main.ts`），引擎只做"一次按键 = 一趟确定性 `assemble`"（`src/driver.ts`）。**引擎当前无一等 loop step——且回合制下无需引入**：MVP-1 走路全程没有被"引擎不支持循环"卡住，loop step（方案 B）未被需要、未实现。这是本议题在"回合制网格游戏"形态下的答案：**循环不进引擎**，引擎守住纯 DAG，`check` 静态可枚举性不受影响。
+- **未暴露 `open-questions.md` 之外的新引擎缺口**；业务/装配逻辑层零非 AFP 范式（纯块 + 配置接线 + 方案 A），`grep "@paradigm" src/` 业务层零命中，无需标记。
+- **关联既有缺口**：`walk.jsonc` 的 `inputMap` 仅做字段重命名，未触及 Q-024；未用流签名，未触及 Q-025。
+- **同站验证的方案 A 复审（呼应 Q-026 留给 MVP-1 的大体量状态轴）**：实测一回合 `initialInput` 紧凑 JSON 796 字符 / 美化 217 行（10×9 网格、51 墙坐标）——全量穿透的"重"落在**运行时数据**上，**不**落在**配置**上（`"grid":"grid"` 接线与网格规模解耦、永远一行）。故"配置笨重到人难审/AI 难产"的复审触发条件**未满足**，**沿用方案 A**，不触发复审。详见 REPORT 第三节。
 
 ---
 

@@ -1,0 +1,31 @@
+// 【配置】走路装配流 · 接线蓝图（方案 A，状态显式接线）
+// ──────────────────────────────────────────────────────────────
+// 这是一份 AFP 配置：声明式地定义"哪个块、按什么顺序、数据怎么接"。
+// 没有任何算法——碰撞判定（越界/撞墙→停、地板→移动）全在块 move-step 里，
+// 这里只做字段接线（inputMap = 把"块要的字段名"映射到"上下文里的字段名"）。
+//
+// 引擎（@assemflow/core 的 assemble()）读这份配置，按 steps 顺序执行 move-step：
+//   initialInput { grid, direction } ──Ajv校验──> move-step ──> out { nextGrid }
+// 设计依据见 .kiro/specs/sokoban-mvp-1-walk/design.md「Components and Interfaces #4」。
+//
+// 方案 A（状态承载：调用方持久化）的物理体现：网格状态 grid 显式出现在 inputMap 里，
+// 由调用方在回合间保管、每回合整份穿进穿出。块保持纯、无跨回合记忆（Requirement 1.6）。
+{
+  "flowName": "sokoban-walk",
+
+  // 流程步骤：单步走路；inputMap 显式声明数据接线（两个映射都只做重命名，未触及 Q-024）
+  "steps": [
+    {
+      "block": "move-step",
+      "inputMap": {
+        // ↓ 观察材料：方案 A「全量状态穿透可读性」
+        // "grid":"grid" 这行把整份网格状态显式接进块——状态在配置里"可见但啰嗦"。
+        // 它正是本 MVP 要观察的对象：当网格规模放大（墙集合可达数十上百坐标），
+        // 这行接线读起来是否仍清晰、AI 照此 pattern 产新关卡配置是否更易出错？
+        // 结论如实记入 REPORT.md 的「全量状态穿透观察」（直接回答 MVP-0 遗留的复审点）。
+        "grid": "grid",
+        "direction": "direction"
+      }
+    }
+  ]
+}
