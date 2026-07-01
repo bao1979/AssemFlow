@@ -41,10 +41,10 @@ function loadWalkConfig(): FlowConfig {
 
 // 单关：4×4 边框墙，角色初始在 (1,1)，内部 (1,1)/(2,1)/(1,2)/(2,2) 是地板。
 //   #####
-//   #@..#
-//   #...#
+//   #@  #
+//   #   #
 //   #####
-const LEVEL = ["#####", "#@..#", "#...#", "#####"].join("\n");
+const LEVEL = ["#####", "#@  #", "#   #", "#####"].join("\n");
 
 describe("装配流端到端：assemble(walk.jsonc) 走路 (R1.2 / R1.6)", () => {
   it("地板方向：assemble 成功，context.nextGrid 把角色移到目标格", () => {

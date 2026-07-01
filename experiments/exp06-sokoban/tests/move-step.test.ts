@@ -19,7 +19,9 @@ const openGrid: GridState = {
   width: 3,
   height: 3,
   walls: [],
+  goals: [],
   player: { x: 1, y: 1 },
+  boxes: [],
 };
 
 describe("move · 四方向移动（Property 2：目标格是地板 → 移动）", () => {
@@ -53,7 +55,9 @@ describe("move · 撞墙不动（Property 2：目标格是墙 → 停原格）",
       width: 3,
       height: 3,
       walls: [{ x: 1, y: 0 }], // 角色正上方是墙
+      goals: [],
       player: { x: 1, y: 1 },
+      boxes: [],
     };
     expect(move(grid, "up")).toEqual(grid);
   });
@@ -63,7 +67,9 @@ describe("move · 撞墙不动（Property 2：目标格是墙 → 停原格）",
       width: 3,
       height: 3,
       walls: [{ x: 1, y: 0 }],
+      goals: [],
       player: { x: 1, y: 1 },
+      boxes: [],
     };
     expect(move(grid, "down").player).toEqual({ x: 1, y: 2 });
   });
@@ -71,29 +77,29 @@ describe("move · 撞墙不动（Property 2：目标格是墙 → 停原格）",
 
 describe("move · 出界不动（Property 2：目标格越界 → 停原格）", () => {
   it("向上越界（y < 0）：停原格", () => {
-    const grid: GridState = { width: 3, height: 3, walls: [], player: { x: 0, y: 0 } };
+    const grid: GridState = { width: 3, height: 3, walls: [], goals: [], player: { x: 0, y: 0 }, boxes: [] };
     expect(move(grid, "up")).toEqual(grid);
   });
 
   it("向左越界（x < 0）：停原格", () => {
-    const grid: GridState = { width: 3, height: 3, walls: [], player: { x: 0, y: 0 } };
+    const grid: GridState = { width: 3, height: 3, walls: [], goals: [], player: { x: 0, y: 0 }, boxes: [] };
     expect(move(grid, "left")).toEqual(grid);
   });
 
   it("向右越界（x >= width）：停原格", () => {
-    const grid: GridState = { width: 3, height: 3, walls: [], player: { x: 2, y: 2 } };
+    const grid: GridState = { width: 3, height: 3, walls: [], goals: [], player: { x: 2, y: 2 }, boxes: [] };
     expect(move(grid, "right")).toEqual(grid);
   });
 
   it("向下越界（y >= height）：停原格", () => {
-    const grid: GridState = { width: 3, height: 3, walls: [], player: { x: 2, y: 2 } };
+    const grid: GridState = { width: 3, height: 3, walls: [], goals: [], player: { x: 2, y: 2 }, boxes: [] };
     expect(move(grid, "down")).toEqual(grid);
   });
 });
 
 describe("move · 连续移动（多回合折叠）", () => {
   it("空旷 3×1 行：连续向右走到底再撞边界停住", () => {
-    const row: GridState = { width: 3, height: 1, walls: [], player: { x: 0, y: 0 } };
+    const row: GridState = { width: 3, height: 1, walls: [], goals: [], player: { x: 0, y: 0 }, boxes: [] };
 
     const step1 = move(row, "right");
     expect(step1.player).toEqual({ x: 1, y: 0 });
@@ -111,7 +117,9 @@ describe("move · 连续移动（多回合折叠）", () => {
       width: 3,
       height: 3,
       walls: [{ x: 1, y: 0 }],
+      goals: [],
       player: { x: 0, y: 0 },
+      boxes: [],
     };
 
     // 向右撞墙 (1,0) → 停原格

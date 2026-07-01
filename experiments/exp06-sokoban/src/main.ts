@@ -1,66 +1,66 @@
 /**
- * 【浏览器入口】src/main.ts —— 外部主循环（脚手架，不打 @paradigm）
- * ────────────────────────────────────────────────────────────
- * 在 AFP 里的角色：前端脚手架 + K-LOOP「外部主循环」选型的落地点。
- *   它把装配流串成一个可玩的回合制 demo：
- *     装载关卡 → 渲染初始网格 → 绑定 keydown
- *       → 每次按键经转接件 keyToDirection 转方向
- *       → 调 stepWalk 跑一趟装配流（引擎确定性执行）
- *       → 更新 currentGrid（方案 A：状态在调用方手里）
- *       → 重渲染
- *
- * K-LOOP（Q-027）选型落地：循环在引擎外。
- *   引擎只负责「一次按键 = 一趟确定性装配」(stepWalk → assemble)，
- *   循环 / 事件 / 渲染都在这里（浏览器侧）。回合制天然适配事件驱动：
- *   keydown 每次按键驱动一趟 assemble，回合后刷新渲染。
- *   引擎不为此引入一等 loop step——保持单趟纯函数式语义。
- *
- * 为什么不打 @paradigm：
- *   main.ts 是前端脚手架 / 浏览器入口，不在「配置即图」的 AFP 数据流承诺范围内
- *   （判据见 .kiro/steering/afp-core.md「标记适用范围」，R4.3）。业务/装配逻辑
- *   （move-step 块、walk 配置、driver）已是纯 AFP，本文件只做事件绑定与状态保管。
+ * @paradigm NON-AFP: external-control-flow
+ * @reason 回合门控（won → 拒绝方向键）、终局输入拦截、R/r 重开三条控制流是"跨回合的时间维度状态
+ *         + 事件级条件分支"，用 AFP 数据流表达要么塞进配置的条件分支（违反"配置图静态可枚举"红线），
+ *         要么把主循环推进引擎（违反 MVP-1 已钉的 K-LOOP 结论）。留浏览器 keydown 回调里是最简解。
+ * @afp-debt 验证期结论：AFP 数据流不承担回合控制流是合理边界，非 AFP 在此处胜出。
+ *          本 debt 不打算偿还——它是 D-013 目标的正面证据，将进 docs/paradigm-comparison.md。
+ *          若门控扩到"暂停/多存档/回放"，需重评升级为 reducer / 状态机再重打标记。
  */
 
 import type { FlowConfig } from "../../../engine/src/index.js";
-
-import { parseLevel, type Direction, type GridState } from "./grid.js";
-import { createWalkRegistry } from "./blocks/move-step.js";
+import { parseLevel, assertPublishableLevel, type Direction, type GridState } from "./grid.js";
+import { createPushRegistry } from "./blocks/register.js";
 import { keyToDirection } from "./adapters/input-adapter.js";
-import { stepWalk } from "./driver.js";
+import { stepPush } from "./driver.js";
 import { render } from "./render.js";
-// 唯一的 JSONC 解析实现（浏览器入口与测试共用，见 jsonc.ts 头部注释：
-// 消灭"各自维护一套解析逻辑"的分叉，是白屏 bug 的根治，不是头痛医头）。
 import { parseJsonc } from "./jsonc.js";
 
-// Vite `?raw` 导入：把关卡文本与配置原样作为字符串引入（design 未决问题：取最简的 ?raw）。
-import levelText from "./levels/level-1.txt?raw";
-import walkConfigRaw from "./configs/walk.jsonc?raw";
+import levelText from "./levels/level-push-1.txt?raw";
+import pushConfigRaw from "./configs/push.jsonc?raw";
 
-// ── 装载（一次性）──────────────────────────────────────────────
+// ── 装载 ──
 
-const config: FlowConfig = parseJsonc<FlowConfig>(walkConfigRaw);
-const registry = createWalkRegistry();
+const config: FlowConfig = parseJsonc<FlowConfig>(pushConfigRaw);
+const registry = createPushRegistry();
 
-// 方案 A：调用方持有 currentGrid，在回合间保管。
 let currentGrid: GridState = parseLevel(levelText);
+assertPublishableLevel(currentGrid); // fail-fast: ≥2 箱 / ≥2 目标 / 开局非通关
+
+let won = false;
 
 const container = document.getElementById("grid");
-if (!container) {
-  throw new Error("main: 找不到挂载点 #grid（index.html 缺少 <div id=\"grid\">）");
-}
+if (!container) throw new Error("main: 找不到挂载点 #grid");
 
-// 渲染初始网格（R2.1：浏览器中加载并显示初始网格）。
 render(currentGrid, container);
 
-// ── 外部主循环：keydown → adapter → stepWalk → render ───────────
+// ── 外部主循环 ──
 
 window.addEventListener("keydown", (event) => {
+  // R/r 重开
+  if (event.key === "r" || event.key === "R") {
+    currentGrid = parseLevel(levelText);
+    won = false;
+    render(currentGrid, container);
+    return;
+  }
+
+  // 胜利门控
+  if (won) return;
+
   const direction: Direction | null = keyToDirection(event.key);
-  if (!direction) return; // 无关按键不触发回合（状态不前进）。
+  if (!direction) return;
+  event.preventDefault();
 
-  event.preventDefault(); // 阻止方向键滚动页面。
+  let result;
+  try {
+    result = stepPush(config, registry, currentGrid, direction);
+  } catch (err) {
+    console.error("[sokoban] stepPush failed:", err);
+    return;
+  }
 
-  // 一回合：跑一趟确定性装配，更新调用方保管的状态，再重渲染（R2.2：移动当场可见）。
-  currentGrid = stepWalk(config, registry, currentGrid, direction);
-  render(currentGrid, container);
+  currentGrid = result.nextGrid;
+  won = result.won;
+  render(currentGrid, container, { won });
 });

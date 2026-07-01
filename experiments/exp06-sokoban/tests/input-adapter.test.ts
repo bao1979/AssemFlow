@@ -43,6 +43,11 @@ describe("keyToDirection —— 输入适配（Property 6）", () => {
     }
   });
 
+  it("重开键 R/r 返回 null（不走装配流，由 main.ts 侧承接重开）", () => {
+    expect(keyToDirection("R")).toBeNull();
+    expect(keyToDirection("r")).toBeNull();
+  });
+
   // 已知映射键集合：除此之外的任意字符串都应返回 null。
   const known = new Set(cases.map(([key]) => key));
 

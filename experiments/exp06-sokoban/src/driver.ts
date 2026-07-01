@@ -52,3 +52,40 @@ export function stepWalk(
 
   return result.context["nextGrid"] as GridState;
 }
+
+// ── MVP-2: 推箱驱动 ─────────────────────────────────────────
+
+/**
+ * 推箱装配流的一回合结果。
+ */
+export interface PushResult {
+  readonly nextGrid: GridState;
+  readonly won: boolean;
+}
+
+/**
+ * 跑一回合推箱：喂入当前网格 + 方向，返回下一网格与胜利判定。
+ *
+ * 内部：assemble(config, registry, { grid, direction })
+ *   → { nextGrid: context.nextGrid, won: context.won }
+ *
+ * assemble 失败（Ajv 拦下非法方向等）抛 Error；调用方保留旧状态由外围 try-catch 处理。
+ */
+export function stepPush(
+  config: FlowConfig,
+  registry: BlockRegistry,
+  grid: GridState,
+  direction: Direction,
+): PushResult {
+  const initialInput: Record<string, unknown> = { grid, direction };
+
+  const result: AssembleResult = assemble(config, registry, initialInput);
+  if (!result.success) {
+    throw new Error(result.error ?? "stepPush: assemble 失败（未知原因）");
+  }
+
+  return {
+    nextGrid: result.context["nextGrid"] as GridState,
+    won: result.context["won"] as boolean,
+  };
+}

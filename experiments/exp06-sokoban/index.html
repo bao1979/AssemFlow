@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sokoban MVP-1 · 网格走路</title>
+    <title>Sokoban MVP-2 · 推箱 + 胜利判定</title>
     <style>
       body {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -28,11 +28,22 @@
         font-size: 24px;
         white-space: pre;
       }
+      .sokoban-win {
+        margin-top: 16px;
+        font-size: 28px;
+        font-weight: 700;
+        color: #4caf50;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <h1>Sokoban MVP-1 · 网格走路</h1>
-    <p class="hint">方向键 / WASD 移动角色（@）。撞墙（#）不动。</p>
+    <h1>Sokoban MVP-2 · 推箱 + 胜利判定</h1>
+    <p class="hint">
+      方向键 / WASD 移动角色（@）。撞墙（#）不动。<br />
+      把所有 <code>$</code> 推到 <code>.</code> 上（变成 <code>*</code>）即胜利。<br />
+      按 R 重开。
+    </p>
     <!-- 挂载点：渲染层把网格画到这里 -->
     <div id="grid"></div>
     <!-- 浏览器入口；src/main.ts 在 Task 10 落地，Vite 届时解析 -->

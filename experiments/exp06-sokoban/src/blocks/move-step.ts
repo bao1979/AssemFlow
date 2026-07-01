@@ -58,7 +58,9 @@ export function move(grid: GridState, direction: Direction): GridState {
     width: grid.width,
     height: grid.height,
     walls: grid.walls,
+    goals: grid.goals,
     player: nextPlayer,
+    boxes: grid.boxes,
   };
 }
 

@@ -8,52 +8,76 @@
  *   它不承载业务/装配逻辑，读者不会因为没标记而误以为这段是纯 AFP 数据流。
  *   按 afp-core.md「标记适用范围」判据，渲染层 / 前端脚手架无需 @paradigm（R4.3）。
  *
- * 设计取舍（design.md Components #6 + 未决问题）：
- *   - MVP-1 只画墙 / 地板 / 角色三种字符：'#' 墙、'.' 地板、'@' 角色。
- *   - 箱子 / 目标点的渲染留 MVP-2——这里预留「按坐标定字符」的结构，但不提前抽象
- *     成可配置符号表（治理关节、放开零件）。
+ * 设计取舍（design.md Components #6 + §8）：
+ *   - MVP-2 字符优先级（同一格多态取最上层）：
+ *     '+' (player on goal) > '@' (player) > '*' (box on goal) > '$' (box) > '.' (goal) > '#' (wall) > ' ' (floor)
+ *   - 网格用 <pre class="sokoban-grid"> 全量替换（replaceChildren）。
+ *   - won === true 时追加独立 <div class="sokoban-win">🎉 你赢了！按 R 重开</div>。
  */
 
 import type { GridState } from "./grid.js";
 
-/** 渲染用字符（MVP-1 三种；MVP-2 再按需扩展箱子/目标点）。 */
-const CHAR = {
-  player: "@",
-  wall: "#",
-  floor: ".",
-} as const;
+/** 渲染选项。 */
+export interface RenderOptions {
+  readonly won?: boolean;
+}
 
 /**
  * 把 GridState 画成 DOM 文本网格，渲染进 container。
- *   - 每个 (x, y) 格按优先级取字符：角色 > 墙 > 地板。
- *   - 用一个 <pre> 承载整张网格（等宽、换行即行），够清楚就行、无美术。
- *   - 每次调用先清空 container，再重建——重渲染天然体现最新状态（含角色位移）。
  *
+ * 字符优先级（同一格多态取最上层）：
+ *   '+' player on goal > '@' player > '*' box on goal > '$' box > '.' goal > '#' wall > ' ' floor
+ *
+ * 每次调用用 replaceChildren 全量替换——重渲染天然体现最新状态（含位移 + won、无残留）。
  * 纯展示：不改 grid、不含业务逻辑。
  */
-export function render(grid: GridState, container: HTMLElement): void {
-  // 墙坐标查表：用 "x,y" 字符串做 O(1) 命中判断（仅渲染期局部使用，不是数据契约）。
+export function render(grid: GridState, container: HTMLElement, opts?: RenderOptions): void {
+  // 查表用 "x,y" 字符串做 O(1) 命中判断（仅渲染期局部使用，不是数据契约）。
   const wallKeys = new Set(grid.walls.map((w) => `${w.x},${w.y}`));
+  const boxKeys = new Set(grid.boxes.map((b) => `${b.x},${b.y}`));
+  const goalKeys = new Set(grid.goals.map((g) => `${g.x},${g.y}`));
 
   const rows: string[] = [];
   for (let y = 0; y < grid.height; y++) {
     let row = "";
     for (let x = 0; x < grid.width; x++) {
-      if (grid.player.x === x && grid.player.y === y) {
-        row += CHAR.player;
-      } else if (wallKeys.has(`${x},${y}`)) {
-        row += CHAR.wall;
+      const key = `${x},${y}`;
+      const isPlayer = grid.player.x === x && grid.player.y === y;
+      const isBox = boxKeys.has(key);
+      const isGoal = goalKeys.has(key);
+      const isWall = wallKeys.has(key);
+
+      if (isPlayer && isGoal) {
+        row += "+";
+      } else if (isPlayer) {
+        row += "@";
+      } else if (isBox && isGoal) {
+        row += "*";
+      } else if (isBox) {
+        row += "$";
+      } else if (isGoal) {
+        row += ".";
+      } else if (isWall) {
+        row += "#";
       } else {
-        row += CHAR.floor;
+        row += " ";
       }
     }
     rows.push(row);
   }
 
-  const pre = container.ownerDocument.createElement("pre");
+  const doc = container.ownerDocument;
+
+  const pre = doc.createElement("pre");
   pre.className = "sokoban-grid";
   pre.textContent = rows.join("\n");
 
-  // 清空后挂上：重渲染 = 全量替换，保证 DOM 始终反映最新 GridState。
-  container.replaceChildren(pre);
+  if (opts?.won === true) {
+    const winDiv = doc.createElement("div");
+    winDiv.className = "sokoban-win";
+    winDiv.textContent = "🎉 你赢了！按 R 重开";
+    container.replaceChildren(pre, winDiv);
+  } else {
+    container.replaceChildren(pre);
+  }
 }

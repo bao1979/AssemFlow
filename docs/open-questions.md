@@ -618,6 +618,13 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 
 **依赖**：Q-026、Q-027（即 MVP-0、MVP-1）。**不要**等 Q-001 / Q-002 / Q-003——本 spec 本身就是复合验证。
 
+**实现期发现（MVP-2 推箱 + 胜利判定完成，Q-028 仍 `open`：推进判据 3 部分证据）**：
+- 实验 `experiments/exp06-sokoban/` 的 MVP-2 部分已落地（typecheck 0 错、94 测试全过、真人浏览器验收通过）。详见 `experiments/exp06-sokoban/REPORT.md` MVP-2 段。
+- **判据 3 证据积累**：`grep "@paradigm" src/` 恰 1 处命中（`src/main.ts` 第 2 行 `@paradigm NON-AFP: external-control-flow`，三字段齐），业务/装配层零命中。`docs/paradigm-comparison.md` 骨架已落地，录入 MVP-2 首要证据点。
+- **方案 A 复审**：boxes + goals 加入后 initialInput 体量 ~437 字符（6×6 关卡），配置可读性仍清晰（push.jsonc 两条 inputMap 一望即知），判读：**沿用 A**，复审触发条件未突破。
+- **关联既有缺口**：step2 `inputMap: { "grid": "nextGrid" }` 是纯字段重命名，**未触及 Q-024**；未用流签名，未触及 Q-025。无新增引擎缺口。
+- **判据 1（加关卡=加数据、引擎零改动）**和**判据 2（一个配置值改行为、块零改动）**必须等 MVP-3 / MVP-4 才能验证，本 MVP 不预判。Q-028 仍 `open`。
+
 ---
 
 

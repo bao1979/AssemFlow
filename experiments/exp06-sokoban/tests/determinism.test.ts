@@ -1,27 +1,45 @@
+// Feature: sokoban-mvp-2-push, Property 2: 一回合确定性 + 块无残留状态（方案 A 纯性）
 /**
- * 走路纯块 move() 的确定性属性测试（fast-check）。
+ * 覆盖设计 design.md 的 Correctness Property 2（一回合确定性 + 块无残留状态）：
+ *   (a) 同 (grid, direction) 跑两遍 stepPush，两次 (nextGrid, won) 逐项相等
+ *   (b) 交叉输入：stepPush(cfg, reg, gridA, d) → 保存 → 中间穿插 stepPush(cfg, reg, gridB, d)
+ *       → 再次 stepPush(cfg, reg, gridA, d)，前后两次 gridA 的结果恒等
+ *   (c) 无时钟 / 无随机 / 无 AI——上述在任意机器 / 时间点跑均成立
  *
- * 覆盖设计 design.md 的 Correctness Property 1（确定性）：
- *   随机合法关卡 + 随机方向序列，经 move 折叠跑两遍，网格序列必须逐项相等。
- *   （无时钟 / 无随机 / 无 AI——若块里偷读了非确定性来源，这条会失败。）
- *
- * Validates: Requirements 1.3
+ * Validates: Requirements 2.1
  */
 
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { move } from "../src/blocks/move-step.js";
+import { parseJsonc } from "../src/jsonc.js";
+import { stepPush, type PushResult } from "../src/driver.js";
+import { createPushRegistry } from "../src/blocks/register.js";
 import type { Direction, GridState, Position } from "../src/grid.js";
+import type { FlowConfig, BlockRegistry } from "../../../engine/src/index.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pushConfig: FlowConfig = parseJsonc<FlowConfig>(
+  readFileSync(resolve(__dirname, "../src/configs/push.jsonc"), "utf-8"),
+);
+const registry: BlockRegistry = createPushRegistry();
+
+// ── Arbitraries ──────────────────────────────────────────────
 
 const directionArb = fc.constantFrom<Direction>("up", "down", "left", "right");
 
 /**
- * 合法网格生成器：角色总落在「非墙地板格」上（满足初始不变式）。
- * 做法：先枚举所有格 → 选一格当角色 → 墙从「其余格」里取子集（保证角色脚下不是墙）。
+ * 合法推箱网格生成器：
+ *   - 玩家不在墙上、不在箱子上
+ *   - 箱子不在墙上、箱子互不重叠
+ *   - goals 数量 = boxes 数量
+ *   - goals 不在墙上
  */
-const gridArb: fc.Arbitrary<GridState> = fc
-  .record({ width: fc.integer({ min: 1, max: 8 }), height: fc.integer({ min: 1, max: 8 }) })
+const pushGridArb: fc.Arbitrary<GridState> = fc
+  .record({ width: fc.integer({ min: 3, max: 7 }), height: fc.integer({ min: 3, max: 7 }) })
   .chain(({ width, height }) => {
     const allCells: Position[] = [];
     for (let y = 0; y < height; y++) {
@@ -29,42 +47,81 @@ const gridArb: fc.Arbitrary<GridState> = fc
         allCells.push({ x, y });
       }
     }
+    // Pick player position first
     return fc.nat({ max: allCells.length - 1 }).chain((playerIdx) => {
       const player = allCells[playerIdx];
-      const otherCells = allCells.filter((c) => !(c.x === player.x && c.y === player.y));
-      return fc
-        .subarray(otherCells)
-        .map((walls) => ({ width, height, walls, player }) satisfies GridState);
+      const remaining = allCells.filter((c) => !(c.x === player.x && c.y === player.y));
+      // Pick walls from remaining
+      return fc.subarray(remaining, { maxLength: Math.min(remaining.length, 10) }).chain((walls) => {
+        const nonWall = remaining.filter(
+          (c) => !walls.some((w) => w.x === c.x && w.y === c.y),
+        );
+        // Pick boxes from non-wall cells (also not player)
+        const maxBoxes = Math.min(nonWall.length, 3);
+        return fc.subarray(nonWall, { maxLength: maxBoxes }).chain((boxes) => {
+          // Pick goals from non-wall cells (excluding boxes count restriction)
+          const nonWallCells = allCells.filter(
+            (c) =>
+              !walls.some((w) => w.x === c.x && w.y === c.y) &&
+              !(c.x === player.x && c.y === player.y),
+          );
+          // Goals count must equal boxes count; pick from nonWallCells
+          const goalCount = boxes.length;
+          return fc
+            .subarray(nonWallCells, { minLength: goalCount, maxLength: goalCount })
+            .map((goals) => ({ width, height, walls, goals, player, boxes }) satisfies GridState);
+        });
+      });
     });
   });
 
-/** 从初始网格出发，按方向序列逐步折叠，记录每步产出的网格序列。 */
-function runSequence(initial: GridState, directions: Direction[]): GridState[] {
-  const trace: GridState[] = [];
-  let current = initial;
-  for (const direction of directions) {
-    current = move(current, direction);
-    trace.push(current);
-  }
-  return trace;
-}
+// ── Tests ────────────────────────────────────────────────────
 
-describe("move · 确定性（Property 1）", () => {
-  it("同一 (关卡, 方向序列) 跑两遍，网格序列逐项相等", () => {
+describe("stepPush · 一回合确定性（Property 2）", () => {
+  it("(a) 同 (grid, direction) 跑两遍 stepPush，两次 (nextGrid, won) 逐项相等", () => {
     fc.assert(
-      fc.property(gridArb, fc.array(directionArb, { maxLength: 50 }), (grid, directions) => {
-        const runA = runSequence(grid, directions);
-        const runB = runSequence(grid, directions);
-        expect(runA).toEqual(runB);
+      fc.property(pushGridArb, directionArb, (grid, direction) => {
+        const resultA: PushResult = stepPush(pushConfig, registry, grid, direction);
+        const resultB: PushResult = stepPush(pushConfig, registry, grid, direction);
+        expect(resultA.nextGrid).toEqual(resultB.nextGrid);
+        expect(resultA.won).toBe(resultB.won);
       }),
+      { numRuns: 200 },
     );
   });
 
-  it("单步 move：同 (grid, direction) 多次调用结果恒等", () => {
+  it("(b) 交叉输入：中间穿插另一网格不影响先前网格的确定性", () => {
     fc.assert(
-      fc.property(gridArb, directionArb, (grid, direction) => {
-        expect(move(grid, direction)).toEqual(move(grid, direction));
+      fc.property(pushGridArb, pushGridArb, directionArb, (gridA, gridB, direction) => {
+        // 第一次对 gridA 执行
+        const firstA: PushResult = stepPush(pushConfig, registry, gridA, direction);
+        // 中间穿插 gridB 执行
+        stepPush(pushConfig, registry, gridB, direction);
+        // 第二次对 gridA 执行
+        const secondA: PushResult = stepPush(pushConfig, registry, gridA, direction);
+        // 前后两次 gridA 结果必须恒等
+        expect(firstA.nextGrid).toEqual(secondA.nextGrid);
+        expect(firstA.won).toBe(secondA.won);
       }),
+      { numRuns: 200 },
+    );
+  });
+
+  it("(c) 无时钟/无随机/无AI——结果只由 (config, registry, grid, direction) 决定", () => {
+    // 跑多次，每次之间穿插时间间隔（逻辑上验证——若块内读了 Date.now() 会偶尔碰撞）
+    fc.assert(
+      fc.property(pushGridArb, directionArb, (grid, direction) => {
+        const results: PushResult[] = [];
+        for (let i = 0; i < 5; i++) {
+          results.push(stepPush(pushConfig, registry, grid, direction));
+        }
+        // 所有结果必须一致
+        for (let i = 1; i < results.length; i++) {
+          expect(results[i].nextGrid).toEqual(results[0].nextGrid);
+          expect(results[i].won).toBe(results[0].won);
+        }
+      }),
+      { numRuns: 100 },
     );
   });
 });

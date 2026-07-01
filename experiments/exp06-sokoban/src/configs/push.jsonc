@@ -1,0 +1,18 @@
+{
+  // 推箱装配流（MVP-2）：move-with-push → win-check，两步顺序执行。
+  // 无条件分支 / 循环，守"配置图静态可枚举"红线。
+  "flowName": "sokoban-push",
+  "steps": [
+    {
+      "block": "move-with-push",
+      "inputMap": { "grid": "grid", "direction": "direction" }
+    },
+    {
+      // step2 的 inputMap { "grid": "nextGrid" } 是纯字段重命名：
+      // 承接 step1 输出摊平进 context 的 nextGrid，作为 win-check 的 grid 参数。
+      // 未触及 Q-024（inputMap 只做重命名，不做计算/转换）。
+      "block": "win-check",
+      "inputMap": { "grid": "nextGrid" }
+    }
+  ]
+}
