@@ -32,7 +32,7 @@
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
         "exp04-k-state": { "status": "Done", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 A/B 状态承载对比，typecheck 0 错、16 测试全过、A 路端到端跑通。阶段性默认起点选 A（调用方持久化），非终局、待 MVP-1 大状态复审。详见 experiments/exp04-k-state/REPORT.md" },
-        "exp06-sokoban": { "status": "InProgress", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路已落地（typecheck 0 错 / 45 测试全过；K-LOOP=外部主循环、引擎无需 loop step；方案 A 沿用未触发复审）；REPORT 见 experiments/exp06-sokoban/REPORT.md。MVP-2 推箱子、MVP-3 5关数据驱动、MVP-4 maxMoves+撤销仍待做。不单设 exp05。" }
+        "exp06-sokoban": { "status": "InProgress", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路已落地（typecheck 0 错 / 48 测试全过；K-LOOP=外部主循环、引擎无需 loop step；方案 A 沿用未触发复审；真人实时浏览器验收通过）；实现期曾因 main.ts/测试各写一套 JSONC 剥注释逻辑致浏览器白屏，已收敛为唯一实现 src/jsonc.ts 根治（非仅补丁）；REPORT 见 experiments/exp06-sokoban/REPORT.md。MVP-2 推箱子、MVP-3 5关数据驱动、MVP-4 maxMoves+撤销仍待做。不单设 exp05。" }
       }
     },
     "spec-paradigm-validation-sokoban": {
@@ -57,9 +57,8 @@
   ],
   "nextSteps": [
     "发表策略已定（D-014）：发表闸口在 MVP-2，MVP-3/4 留社区。根 README 已改为对外门面版；发表前 checklist 见路线图。",
-    "MVP-1 走路已交付（K-LOOP 结论=外部主循环、方案 A 沿用）→ 进入 MVP-2（sokoban-mvp-2-push）推箱子 + 胜利判定 = 发表闸口",
+    "MVP-1 走路已交付并经真人实时浏览器验收（K-LOOP 结论=外部主循环、方案 A 沿用）→ 进入 MVP-2（sokoban-mvp-2-push）推箱子 + 胜利判定 = 发表闸口",
     "到 MVP-2 收尾时走发表前 checklist（含选 LICENSE、CONTRIBUTING、good-first-issue 拆分、可玩动图）",
-    "建议：补一次真人实时浏览器目视/截图签收 MVP-1 demo（REPORT 已标注此为唯一未留档的成色项）",
     "Q-024 inputMap 表达力增强（小工程，可并行推进，能让 MVP-2/3 配置更纯净）"
   ],
   "openQuestions": [

@@ -10,6 +10,13 @@
  *
  * 测试用真实的 walk.jsonc 配置（剥行注释后 JSON.parse），保持诚实——
  * 不在 TS 里另造一份配置对象，避免与配置源漂移。
+ *
+ * JSONC 解析复用 src/jsonc.ts 的唯一实现（而非本文件自己另写一套正则）。
+ * 曾经的教训（如实记录于 REPORT.md 第四节）：本文件一度维护着一套独立的
+ * 剥注释正则，与 main.ts 的实现分叉——main.ts 当时按 \n 切分、对 CRLF
+ * 的 walk.jsonc 处理有 bug，但因为测试从未走那条代码路径，"测试全绿"
+ * 完全没能挡住"浏览器真跑会白屏"。现在浏览器入口与测试共用同一个
+ * parseJsonc，物理上不可能再分叉。
  */
 
 import { describe, it, expect } from "vitest";
@@ -21,15 +28,15 @@ import { assemble, type FlowConfig } from "../../../engine/src/index.js";
 import { createWalkRegistry } from "../src/blocks/move-step.js";
 import { stepWalk } from "../src/driver.js";
 import { parseLevel, type GridState } from "../src/grid.js";
+import { parseJsonc } from "../src/jsonc.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = resolve(__dirname, "../src/configs/walk.jsonc");
 
-/** 读真实 walk.jsonc：剥行注释后 JSON.parse（与 exp01 同法，保持诚实）。 */
+/** 读真实 walk.jsonc：与浏览器入口（main.ts）共用同一个 parseJsonc。 */
 function loadWalkConfig(): FlowConfig {
   const raw = readFileSync(CONFIG_PATH, "utf-8");
-  const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
-  return JSON.parse(stripped) as FlowConfig;
+  return parseJsonc<FlowConfig>(raw);
 }
 
 // 单关：4×4 边框墙，角色初始在 (1,1)，内部 (1,1)/(2,1)/(1,2)/(2,2) 是地板。

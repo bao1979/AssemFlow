@@ -566,10 +566,11 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 **resolution**：`avoided`
 
 **evidence**：
-- 实验 `experiments/exp06-sokoban/` MVP-1 走路（spec `.kiro/specs/sokoban-mvp-1-walk/`）：`npm run typecheck` 0 错、`npx vitest run` 7 文件 45 测试全过（本轮真实输出）
+- 实验 `experiments/exp06-sokoban/` MVP-1 走路（spec `.kiro/specs/sokoban-mvp-1-walk/`）：`npm run typecheck` 0 错、`npx vitest run` 8 文件 48 测试全过（本轮真实输出）
 - K-LOOP 结论 + 全量状态穿透观察见 `experiments/exp06-sokoban/REPORT.md` 第一节
 - 读 `engine/src/assemble.ts` 确认引擎对 `config.steps` 仅单趟顺序遍历、无任何循环 / 迭代构造（纯 DAG）
 - 选「主循环在外部」：循环放浏览器 `keydown` 回调（`src/main.ts`），引擎只做"一次按键 = 一趟确定性 assemble"（`src/driver.ts`）；候选 B（引擎一等 loop step）未实现、引擎未为此修改
+- **真人实时浏览器验收通过**：方向键 / WASD 走路、撞墙不动、角色移动当场可见（补齐此前仅程序化验证的缺口）
 
 **resolvedAt**：2026-06-30
 
