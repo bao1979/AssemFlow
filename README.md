@@ -20,7 +20,19 @@
 
 ## 现在能摸到什么（约 1 分钟）
 
-> 诚实说明：**可玩的 Sokoban demo 还没做出来**（见下方路线图，它是我们的"发表闸口"）。现在能跑的是引擎和四个验证实验。
+三种入口，选一个进：
+
+### 能玩 · Sokoban 推箱子（MVP-2 已交付，发表闸口达标）
+
+```powershell
+cd experiments/exp06-sokoban
+npm install
+npm run dev
+```
+
+浏览器打开显示的地址：方向键 / WASD 推箱子，把所有 `$` 推到 `.` 上（变成 `*`）即胜利，按 R 重开。**核心玩法 = 一个"走+推"纯装配块 + 一个"胜利判定"纯装配块 + 一份两步装配流配置**——教程第 12 课会把这条动线拆开讲。
+
+### 能跑 · 引擎与验证实验
 
 ```powershell
 # 跑引擎：静态校验 + 确定性装配 + Mermaid 配置图
@@ -35,6 +47,10 @@ npm test
 ```
 
 每个实验目录下都有 `README.md` / `REPORT.md`，记录它验证了什么、结论是什么、边界在哪。
+
+### 能读 · 教程（推荐新访客从这里入）
+
+[从零学 AFP · 12 课教程](docs/tutorial/README.md) —— 由浅入深，任何人都能跟着走；每课都能亲手跑、看到输出；最后一课回到 Sokoban 真项目。
 
 ## 五元构件（术语锚点）
 
@@ -74,23 +90,21 @@ flowchart LR
 
 | MVP | 主题 | 状态 |
 | :--- | :--- | :--- |
-| MVP-0 | 状态机（红绿灯）状态承载对比 | ✅ 已完成 |
-| MVP-1 | 走路 + 渲染 | 进行中 / 下一步 |
-| **MVP-2** | **推箱子 + 胜利判定** | **← 发表闸口：到这里有可玩 demo，正式对外发布** |
-| MVP-3 | 5 关 ASCII 关卡集（加关 = 加数据） | 🙋 留作社区任务 |
-| MVP-4 | maxMoves 开关 + 撤销 | 🙋 留作社区任务 |
+| MVP-0 | 状态机（红绿灯）状态承载对比 | ✅ 已完成（[REPORT](experiments/exp04-k-state/REPORT.md)） |
+| MVP-1 | 走路 + 渲染 | ✅ 已完成（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-1-走路报告k-loop-结论--全量状态穿透观察)） |
+| **MVP-2** | **推箱子 + 胜利判定** | **✅ 已完成 · 发表闸口达标**（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-2-推箱报告推箱--胜利判定--发表闸口)） |
+| MVP-3 | 5 关 ASCII 关卡集（加关 = 加数据） | 未开始 |
+| MVP-4 | maxMoves 开关 + 撤销 | 未开始 |
 
-## 想参与？这里有适合上手的事
+## 想参与？
 
-- **🤖 拿大模型实测（最缺的数据）**：项目当前最大的知识盲区——**AI agent 在 AFP 结构里到底好不好用？** 届时会提供一份提示词自测包（`docs/agent-test-prompts.md`），欢迎用你常用的模型跑、反馈结果。不需要理解引擎内部，会问大模型话就行。
-- **🙋 加一关（最轻的贡献）**：认识 Sokoban ASCII 格式就能上手。比"加一个能用的关卡"更有意思的是**故意写个坏关卡**（墙不闭合 / 箱子数 ≠ 目标数 / 没有玩家），看静态校验 `check` 拦不拦得住、报错好不好懂——这才是有信息量的部分。
-- **🧐 质疑边界**：觉得某个结论站不住、或某处该用别的范式？开 issue 直说。**"AFP 在 X 崩了"和"成立"同等有价值**——只要诚实。
+**这个项目暂时不缺代码，缺诚实读者**——愿意花时间读一遍、说一句"这里读不懂 / 这条我不信 / 我的场景是这样"的人。
 
-> 开源许可证与贡献指南正在筹备（见发表前 checklist）。在此之前欢迎以 issue / discussion 形式参与讨论。
+参与门槛从低到高的四种形态（评论式反馈 / AI 自测 / 关卡贡献 / 代码 PR），以及每种的具体做法与期待，见 [**CONTRIBUTING.md**](CONTRIBUTING.md)。
 
 ## 文档导航
 
 - [可行性分析](docs/装配流编程-可行性分析.md) —— 范式的先例扫描与可行性论证
-- [教程（11 课）](docs/tutorial/README.md) —— 从零学 AFP
+- [教程（12 课）](docs/tutorial/README.md) —— 从零学 AFP
 - [Sokoban 验证路线图](docs/paradigm-validation-sokoban-roadmap.md) —— 全局地图与 MVP 链
 - [系统设计](docs/ai/system-design.md) · [项目状态（SSOT）](docs/ai/state.json) · 范式纪律（宪法）`.kiro/steering/afp-core.md`

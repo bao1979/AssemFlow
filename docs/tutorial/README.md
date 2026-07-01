@@ -52,8 +52,23 @@
 | 10 | [粒度不能自上而下定义](10-granularity.md) |
 | 11 | [配置即图](11-config-as-graph.md) |
 
+## 第五部分 · 从教学到实战
+
+| 课 | 标题 |
+| :--- | :--- |
+| 12 | [看真实项目：Sokoban 推箱子](12-real-world-sokoban.md) |
+
 ---
+
+## 读完之后往哪里去
+
+11 课教学 demo + 第 12 课 Sokoban 桥接后，四条延伸路径：
+
+- **想看 AFP 用于真项目的完整落地** → `experiments/exp06-sokoban/` + [MVP-2 报告](../../experiments/exp06-sokoban/REPORT.md)（含通俗解读的六节工程报告）
+- **想看范式在什么场景成立、什么场景崩** → 4 个实验的 `REPORT.md`（`experiments/exp01-sweet-spot/` ~ `exp04-k-state/`）
+- **想深潜论证与先例扫描** → [装配流编程可行性分析](../装配流编程-可行性分析.md)（Brooks / Tesler / Hayek 三位前人肩上的推理）
+- **想参与贡献** → 根仓库 [README](../../README.md) 的"想参与？"章节（AI 实测 · 加一关 · 质疑边界）
 
 ## 状态
 
-全部 11 课已写。
+全部 12 课已写。
