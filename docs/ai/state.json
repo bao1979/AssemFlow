@@ -1,10 +1,10 @@
 {
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
-  "updatedAt": "2026-07-01",
+  "updatedAt": "2026-07-02",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md，拆成 5 个 MVP spec）。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md，拆成 5 个 MVP spec）。MVP-0/1/2 已完成落地，MVP-2 = 发表闸口。MVP-3/4 已改精简版自己推进（不再依赖社区）：MVP-3 = 3 关 + 独立 check 工具，MVP-4 = 撤销 + @paradigm 判据实证（maxMoves 附加）。",
   "phase": "范式验证-Sokoban MVP-2 推箱完成，发表闸口就绪",
-  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。终极标的 Sokoban 已拆成 MVP 链并分文档落地：全局路线图 `docs/paradigm-validation-sokoban-roadmap.md`；5 个独立 spec `.kiro/specs/sokoban-mvp-{0..4}-*`（MVP-0 K-STATE 红绿灯 / MVP-1 走路含 K-LOOP / MVP-2 推箱子 / MVP-3 5关数据驱动 / MVP-4 maxMoves+撤销）。引擎以 Godot 为词汇参照（借 Scene/Resource/Input 映射，拒帧tick/Node继承/Signal）。AI 介入改为提示词自测包，不做自动验收。Requirements 已定稿待评审。",
+  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。终极标的 Sokoban 已拆成 MVP 链并分文档落地：全局路线图 `docs/paradigm-validation-sokoban-roadmap.md`；5 个独立 spec `.kiro/specs/sokoban-mvp-{0..4}-*`（MVP-0 K-STATE 红绿灯 / MVP-1 走路含 K-LOOP / MVP-2 推箱子 / MVP-3 关卡集+check（精简版）/ MVP-4 撤销+@paradigm 判据实证（精简版））。引擎以 Godot 为词汇参照（借 Scene/Resource/Input 映射，拒帧tick/Node继承/Signal）。AI 介入改为提示词自测包，不做自动验收。MVP-3/4 已改精简版自己推进（原留社区计划已撤销，见 D-014 修订）。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -32,12 +32,12 @@
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
         "exp04-k-state": { "status": "Done", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 A/B 状态承载对比，typecheck 0 错、16 测试全过、A 路端到端跑通。阶段性默认起点选 A（调用方持久化），非终局、待 MVP-1 大状态复审。详见 experiments/exp04-k-state/REPORT.md" },
-        "exp06-sokoban": { "status": "InProgress", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路已落地；**MVP-2 推箱 + 胜利判定已落地**（typecheck 0 错 / 94 测试全过；推箱 + 胜利判定 + 发表闸口硬约束；方案 A 沿用未触发复审；@paradigm 恰 1 处 main.ts，业务层零命中；真人浏览器验收通过；docs/paradigm-comparison.md 骨架已落地）；MVP-3 5关数据驱动、MVP-4 maxMoves+撤销仍待做。不单设 exp05。" }
+        "exp06-sokoban": { "status": "InProgress", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路已落地；**MVP-2 推箱 + 胜利判定已落地**（typecheck 0 错 / 94 测试全过；推箱 + 胜利判定 + 发表闸口硬约束；方案 A 沿用未触发复审；@paradigm 恰 1 处 main.ts，业务层零命中；真人浏览器验收通过；docs/paradigm-comparison.md 骨架已落地）。**MVP-3/4 已改精简版自己推进**（不再依赖社区）：MVP-3 = 3 关 + 独立 check 工具，MVP-4 = 撤销 + @paradigm 判据实证（maxMoves 附加）。不单设 exp05。" }
       }
     },
     "spec-paradigm-validation-sokoban": {
       "status": "InProgress",
-      "notes": "已拆分落地：全局路线图 docs/paradigm-validation-sokoban-roadmap.md + 5 个独立 MVP spec（.kiro/specs/sokoban-mvp-0..4）。MVP-0、MVP-1、**MVP-2 已落地实现**（MVP-2 推箱 + 胜利判定 + 发表闸口硬约束，typecheck 0 错 / 94 测试全过 / 真人浏览器验收通过）；发表闸口就绪（D-014 checklist 走查完成、paradigm-comparison.md 骨架已落地）；MVP-3/4 Requirements 已定稿待逐个推进。验证 AFP / 混合范式在网格回合制游戏上的适配度。"
+      "notes": "已拆分落地：全局路线图 docs/paradigm-validation-sokoban-roadmap.md + 5 个独立 MVP spec（.kiro/specs/sokoban-mvp-0..4）。MVP-0、MVP-1、**MVP-2 已落地实现**（MVP-2 推箱 + 胜利判定 + 发表闸口硬约束，typecheck 0 错 / 94 测试全过 / 真人浏览器验收通过）；发表闸口就绪（D-014 checklist 走查完成、paradigm-comparison.md 骨架已落地）。**MVP-3/4 已改精简版自己推进**（不再留社区，见 D-014 2026-07 修订）：MVP-3 = 3 关 + 独立 check 工具，MVP-4 = 撤销 + @paradigm 判据实证（maxMoves 附加·可跳过）。验证 AFP / 混合范式在网格回合制游戏上的适配度。"
     }
   },
   "decisions": [
@@ -53,12 +53,14 @@
     { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。" },
     { "id": "D-012", "decision": "块的业务校验失败通过 throw Error 表达；引擎统一 catch 转为 AssembleResult.error。" },
     { "id": "D-013", "decision": "项目目标升级：从「证明 AFP 成立」转为「寻找 AI 介入模式下的更优编程范式」。允许混合 AFP + reducer/状态机/ECS/行为树等。终极验证标的 = Sokoban 网页游戏。" },
-    { "id": "D-014", "decision": "发表与招人策略：发表闸口设在 MVP-2（有可玩 demo 即对外发布，不等全链做完）；MVP-3/4 与交付物 A 留作社区 good-first-issue（加关=加数据，本身即甜区验证）；根 README 反转为对外门面（已改）。发表前 checklist 见 docs/paradigm-validation-sokoban-roadmap.md「发表与招人策略」节。" }
+    { "id": "D-014", "decision": "发表与招人策略：发表闸口设在 MVP-2（有可玩 demo 即对外发布，不等全链做完）；根 README 反转为对外门面（已改）。**2026-07 修订**：MVP-3/4 原留社区计划已撤销，改为精简版自己推进——MVP-3 从 5 关压缩到 3 关 + 独立 check 工具，MVP-4 重心从 maxMoves 移到「撤销 + @paradigm 判据实证」（maxMoves 降为附加·可跳过）；交付物 A（AI 实测提示词自测包）仍是最需要外部参与的一档。发表前 checklist 见 docs/paradigm-validation-sokoban-roadmap.md「发表与招人策略」节。" }
   ],
   "nextSteps": [
-    "MVP-2 推箱已交付 → 发表闸口就绪。待办：根 README 动图 + CONTRIBUTING.md + LICENSE 选定 + good-first-issue 拆分（发布仪式任务）",
-    "发布仪式完成后对外正式发表（路线图 D-014）",
-    "MVP-3（sokoban-mvp-3-levels）5 关 ASCII 关卡集——留作社区 good-first-issue 或后续推进",
+    "MVP-2 推箱已交付 + CONTRIBUTING.md + 教程 12 课 + 精简版 MVP-3/4 spec 已就位 → 发表闸口就绪。仓库首次 push + GitHub 可见性改 Public",
+    "发布后短期（1-2 周）建议：起草 docs/agent-test-prompts.md 骨架（3-5 条提示词）—— 交付物 A 是最缺 0 数据的一档",
+    "MVP-4 精简版：撤销 + @paradigm 判据实证（主要）——目标是 paradigm-comparison.md 从 1 处证据扩到 2 处（三选一诚实结论）。这是最短路径拿最大剩余价值",
+    "MVP-3 精简版：3 关关卡集 + 独立 check 工具（跟 MVP-4 顺序自定）",
+    "Q-001（演化）建议在 open-questions.md 显式改为 deferred——目前是项目最大的诚实债",
     "Q-024 inputMap 表达力增强仍可并行"
   ],
   "openQuestions": [

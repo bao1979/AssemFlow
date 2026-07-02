@@ -93,8 +93,8 @@ flowchart LR
 | MVP-0 | 状态机（红绿灯）状态承载对比 | ✅ 已完成（[REPORT](experiments/exp04-k-state/REPORT.md)） |
 | MVP-1 | 走路 + 渲染 | ✅ 已完成（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-1-走路报告k-loop-结论--全量状态穿透观察)） |
 | **MVP-2** | **推箱子 + 胜利判定** | **✅ 已完成 · 发表闸口达标**（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-2-推箱报告推箱--胜利判定--发表闸口)） |
-| MVP-3 | 5 关 ASCII 关卡集（加关 = 加数据） | 未开始 |
-| MVP-4 | maxMoves 开关 + 撤销 | 未开始 |
+| MVP-3 | 3 关关卡集 + 独立静态校验工具 | 🕒 计划推进（精简版） |
+| MVP-4 | 撤销 + `@paradigm` 判据实证（maxMoves 附加） | 🕒 计划推进（精简版） |
 
 ## 想参与？
 

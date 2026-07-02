@@ -130,8 +130,8 @@ The full roadmap is here:
 | MVP-0 | State-carrying comparison with a traffic light state machine | Done |
 | MVP-1 | Walking plus rendering | Done |
 | MVP-2 | Pushing plus win detection | Done |
-| MVP-3 | Five ASCII levels, "add a level = add data" | Not started |
-| MVP-4 | `maxMoves` config switch plus undo | Not started |
+| MVP-3 | 3 levels + standalone static checker (scoped-down) | 🕒 Planned (scoped-down) |
+| MVP-4 | Undo + `@paradigm` judgment evidence (`maxMoves` as add-on, scoped-down) | 🕒 Planned (scoped-down) |
 
 Important nuance:
 
@@ -186,7 +186,7 @@ Useful ways to contribute:
 - Read the docs and tell us where the reasoning is weak or unclear
 - Challenge the current boundary claims with real counterexamples
 - Try the Sokoban demo and report what is confusing or brittle
-- Help later with MVP-3 and MVP-4 once those tasks are opened up
+- Help extend or refine the scoped-down MVP-3 and MVP-4 once initial versions ship
 - Run your own AI-agent experiments once the prompt pack is published
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the four ways to participate (from low-barrier feedback to code PRs).
