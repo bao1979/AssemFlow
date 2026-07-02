@@ -10,57 +10,120 @@
 
 import type { FlowConfig } from "../../../engine/src/index.js";
 import { parseLevel, assertPublishableLevel, type Direction, type GridState } from "./grid.js";
+import { checkLevel } from "./check.js";
 import { createPushRegistry } from "./blocks/register.js";
 import { keyToDirection } from "./adapters/input-adapter.js";
 import { stepPush } from "./driver.js";
 import { render } from "./render.js";
 import { parseJsonc } from "./jsonc.js";
 
-import levelText from "./levels/level-push-1.txt?raw";
+import { LEVELS, DEFAULT_LEVEL, PUBLISHABLE_LEVELS } from "./levels-manifest.js";
 import pushConfigRaw from "./configs/push.jsonc?raw";
 
-// ── 装载 ──
+// ── bootstrap 装载期一次性函数 ──
 
-const config: FlowConfig = parseJsonc<FlowConfig>(pushConfigRaw);
-const registry = createPushRegistry();
+/**
+ * 装载期一次性函数：解析 URL 选关 → base check → parseLevel → gate → render + 绑定 keydown。
+ * 可注入依赖，支持 jsdom 测试。不新增 @paradigm 标记（装载期一次性，非跨回合控制流）。
+ */
+export function bootstrap(
+  container: HTMLElement,
+  urlSearch: string,
+  levels: Readonly<Record<string, string>>,
+  defaultLevel: string,
+  publishableLevels: ReadonlySet<string>,
+  pushConfigRaw: string,
+): { currentGrid: GridState; levelText: string; levelName: string } {
+  const { name: levelName, rawText: levelText } = resolveLevelFromUrl(
+    urlSearch, levels, defaultLevel,
+  );
 
-let currentGrid: GridState = parseLevel(levelText);
-assertPublishableLevel(currentGrid); // fail-fast: ≥2 箱 / ≥2 目标 / 开局非通关
-
-let won = false;
-
-const container = document.getElementById("grid");
-if (!container) throw new Error("main: 找不到挂载点 #grid");
-
-render(currentGrid, container);
-
-// ── 外部主循环 ──
-
-window.addEventListener("keydown", (event) => {
-  // R/r 重开
-  if (event.key === "r" || event.key === "R") {
-    currentGrid = parseLevel(levelText);
-    won = false;
-    render(currentGrid, container);
-    return;
+  // 装载前：base 静态 check（所有关都跑）
+  const checkResult = checkLevel(levelText);
+  if (!checkResult.ok) {
+    console.error("[sokoban] base check 未通过：", checkResult.issues);
+    container.textContent =
+      `关卡 "${levelName}" 未通过 base 静态 check：\n` +
+      checkResult.issues.map(i => `  [${i.rule}] ${i.message}`).join("\n");
+    throw new Error(`base check failed for level "${levelName}"`);
   }
 
-  // 胜利门控
-  if (won) return;
+  // 装载期
+  let currentGrid: GridState = parseLevel(levelText);
 
-  const direction: Direction | null = keyToDirection(event.key);
-  if (!direction) return;
-  event.preventDefault();
-
-  let result;
-  try {
-    result = stepPush(config, registry, currentGrid, direction);
-  } catch (err) {
-    console.error("[sokoban] stepPush failed:", err);
-    return;
+  // 仅发表关：assertPublishableLevel
+  if (publishableLevels.has(levelName)) {
+    assertPublishableLevel(currentGrid);
   }
 
-  currentGrid = result.nextGrid;
-  won = result.won;
-  render(currentGrid, container, { won });
-});
+  // 装配流配置 + 注册
+  const config: FlowConfig = parseJsonc<FlowConfig>(pushConfigRaw);
+  const registry = createPushRegistry();
+
+  let won = false;
+
+  render(currentGrid, container);
+
+  // ── 外部主循环 ──
+  window.addEventListener("keydown", (event) => {
+    // R/r 重开
+    if (event.key === "r" || event.key === "R") {
+      currentGrid = parseLevel(levelText);
+      won = false;
+      render(currentGrid, container);
+      return;
+    }
+
+    // 胜利门控
+    if (won) return;
+
+    const direction: Direction | null = keyToDirection(event.key);
+    if (!direction) return;
+    event.preventDefault();
+
+    let result;
+    try {
+      result = stepPush(config, registry, currentGrid, direction);
+    } catch (err) {
+      console.error("[sokoban] stepPush failed:", err);
+      return;
+    }
+
+    currentGrid = result.nextGrid;
+    won = result.won;
+    render(currentGrid, container, { won });
+  });
+
+  return { currentGrid, levelText, levelName };
+}
+
+// ── 顶层调用 ──
+
+const gridEl = document.getElementById("grid");
+if (gridEl) {
+  bootstrap(gridEl, window.location.search, LEVELS, DEFAULT_LEVEL, PUBLISHABLE_LEVELS, pushConfigRaw);
+}
+
+// ── resolveLevelFromUrl ──
+
+/**
+ * 装载期解析 URL 中的 level 参数。纯函数（同 search 同结果），
+ * 属于装载前"用户选哪份数据"的一次性数据选择，非跨回合控制流——
+ * 因此不新增 @paradigm 标记。
+ */
+export function resolveLevelFromUrl(
+  search: string,
+  levels: Readonly<Record<string, string>>,
+  defaultLevel: string,
+): { name: string; rawText: string } {
+  const params = new URLSearchParams(search);
+  const requested = params.get("level");
+  if (requested && levels[requested]) {
+    return { name: requested, rawText: levels[requested] };
+  }
+  // 未指定 或 指定了不存在的关 → 用默认关
+  if (requested) {
+    console.warn(`[sokoban] 未知关卡 "${requested}"，回退到默认关 "${defaultLevel}"`);
+  }
+  return { name: defaultLevel, rawText: levels[defaultLevel] };
+}

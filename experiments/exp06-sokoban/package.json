@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check-level": "tsx scripts/check-level.ts"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.33.0",

@@ -599,13 +599,13 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 
 **为什么关键**：项目目标已升级（D-013）——不只验证 AFP 是否成立，而是寻找"AI 介入模式下的更优编程范式"。游戏是载体，真正产出是一套"人 + AI agent 协作开发"的工程范式 + AFP 适用域清单。Sokoban 是最纯净标的（每关一份 ASCII 数据 = AFP "AI 产配置"的天然舞台）。
 
-**状态**：`open`
+**状态**：`in_progress`
 
 **验证思路**：拆成一条 MVP 链。全局路线图见 `docs/paradigm-validation-sokoban-roadmap.md`；每个 MVP 是独立 spec：
 - **MVP-0**：K-STATE 红绿灯状态机（= Q-026）→ `.kiro/specs/sokoban-mvp-0-k-state/`
 - **MVP-1**：走路 + 渲染（含 K-LOOP = Q-027）→ `.kiro/specs/sokoban-mvp-1-walk/`
 - **MVP-2**：推箱子 + 胜利判定 → `.kiro/specs/sokoban-mvp-2-push/`
-- **MVP-3**：5 关 ASCII 关卡集 + 静态校验 → `.kiro/specs/sokoban-mvp-3-levels/`
+- **MVP-3**：3 关 ASCII 关卡集 + 静态校验 → `.kiro/specs/sokoban-mvp-3-levels/`
 - **MVP-4**：maxMoves 配置开关 + 撤销 → `.kiro/specs/sokoban-mvp-4-tuning/`
 
 引擎参照 Godot 的词汇（Scene/Resource/Input 映射），但拒绝其架构（帧 tick / Node 继承 / Signal）。
@@ -624,6 +624,13 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 - **方案 A 复审**：boxes + goals 加入后 initialInput 体量 ~437 字符（6×6 关卡），配置可读性仍清晰（push.jsonc 两条 inputMap 一望即知），判读：**沿用 A**，复审触发条件未突破。
 - **关联既有缺口**：step2 `inputMap: { "grid": "nextGrid" }` 是纯字段重命名，**未触及 Q-024**；未用流签名，未触及 Q-025。无新增引擎缺口。
 - **判据 1（加关卡=加数据、引擎零改动）**和**判据 2（一个配置值改行为、块零改动）**必须等 MVP-3 / MVP-4 才能验证，本 MVP 不预判。Q-028 仍 `open`。
+
+**实现期发现（MVP-3 多关+独立check完成，Q-028 仍 `in_progress`：判据 1 部分证据兑现）**：
+- 实验 `experiments/exp06-sokoban/` 的 MVP-3 部分已落地（typecheck 0 错、22 文件 173 测试全过、真人浏览器三关验收通过、CLI 四份关卡冒烟通过）。详见 `experiments/exp06-sokoban/REPORT.md` MVP-3 段。
+- **判据 1 证据兑现**：3 关稳定重复证明"加关卡 = 加数据"——`PUBLISHABLE_LEVELS` 从 `src/levels/publishable/` 目录派生（`new Set(Object.keys(publishable))`，非硬编码）；新增 `level-push-big.txt` 时代码零改动；CLI 工具 `scripts/check-level.ts` 能脱浏览器判定关卡合法性（`checkLevel` 函数是唯一校验真相源、CLI 是薄壳）。`engine/**` 在 MVP-3 期间 0 改动（R1.4 架构不变量守法）。
+- **判据 3 证据延续**：`grep "@paradigm" src/` 恰 1 处命中（`src/main.ts`），MVP-3 新增 `src/scan-ascii.ts` / `src/check.ts` / `src/levels-manifest.ts` 全零命中——业务/装配层持续零非AFP标记。
+- **关联既有缺口**：无新增引擎缺口。`parseLevel` 内部重构委托 `checkLevel` 后 MVP-2 全部 12 份测试零改动继续绿——SSOT 铁律 2 落实。
+- **判据 2（一个配置值改行为、块零改动）**必须等 MVP-4 才能验证。Q-028 改为 `in_progress`（判据 1+3 有证据、判据 2+4 待 MVP-4）。
 
 ---
 

@@ -1,4 +1,4 @@
-﻿<!-- Derived from the Chinese README, which remains the source of truth. -->
+﻿﻿<!-- Derived from the Chinese README, which remains the source of truth. -->
 
 # AssemFlow
 

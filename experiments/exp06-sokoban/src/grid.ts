@@ -14,9 +14,14 @@
  *   3. TypeBox schema 既给 TS 类型，又产出标准 JSON Schema 供引擎 Ajv 校验。
  *   4. "box on goal" 是派生态，不入字段（单一真相 = 坐标；避免与坐标漂移）。
  *   5. 两层契约：base parseLevel（通用装载）与 assertPublishableLevel（发表关额外硬约束）分层。
+ *
+ * MVP-3 重构（design §6.5）：parseLevel 委托 checkLevel，不再自己逐字符扫描。
+ * 依赖方向：grid.ts → check.ts → scan-ascii.ts 单向链、无环。
+ * grid.ts 不直接 import scan-ascii.ts。
  */
 
 import { Type, type Static } from "@sinclair/typebox";
+import { checkLevel, type CheckIssue } from "./check.js";
 
 // ── 类型 ────────────────────────────────────────────────────
 
@@ -79,81 +84,55 @@ void _typeGuards;
  *   '#' 墙 / ' ' 地板 / '.' 目标格 / '$' 箱子 / '*' 箱子在目标格 /
  *   '@' 玩家 / '+' 玩家在目标格
  *
- * base 契约校验：
- *   - 恰一 '@' 或一 '+'（缺/多角色抛 Error）
- *   - 箱数（$ + *）= 目标数（. + * + +），允许 0=0 合法特例
- *   - 边界闭合不强校验（留 MVP-3）
+ * MVP-3 重构（design §6.5）：委托 checkLevel 做校验 + 扫描，
+ * parseLevel 只负责"合法关的数据构造"。
+ * 校验四条规则：invalid-char / player-count / box-goal-imbalance / boundary-not-closed
+ * 不合法输入 → 抛 Error（消息保持 MVP-2 兼容格式）。
  *
  * 装载期一次性纯函数（非每回合）。
  */
 export function parseLevel(ascii: string): GridState {
-  // 按行切分；统一去掉 \r 以兼容 CRLF 文本。
-  // 末尾去掉空行：文件常以换行结尾，否则会多解析出一整行"空地板"。
-  const lines = ascii.replace(/\r/g, "").replace(/\n+$/, "").split("\n");
-  const height = lines.length;
-  let width = 0;
-  for (const line of lines) {
-    if (line.length > width) width = line.length;
+  const result = checkLevel(ascii);
+  if (!result.ok) {
+    // 按规则生成向后兼容的错误消息（MVP-2 测试 regex 依赖这些措辞）
+    const primary = result.issues[0];
+    throw new Error(parseLevelErrorMessage(primary));
   }
+  // 直接从 checkLevel 返回的 scan 字段取——无冗余扫描
+  const { scan } = result;
+  return {
+    width: scan.width,
+    height: scan.height,
+    walls: scan.walls as Position[],
+    goals: scan.goals as Position[],
+    player: scan.players[0],
+    boxes: scan.boxes as Position[],
+  };
+}
 
-  const walls: Position[] = [];
-  const goals: Position[] = [];
-  const boxes: Position[] = [];
-  const players: Position[] = [];
-
-  for (let y = 0; y < lines.length; y++) {
-    const line = lines[y];
-    for (let x = 0; x < line.length; x++) {
-      const ch = line[x];
-      switch (ch) {
-        case "#":
-          walls.push({ x, y });
-          break;
-        case "@":
-          players.push({ x, y });
-          break;
-        case "+":
-          // 玩家在目标格：同时定位 player + 追加 goals
-          players.push({ x, y });
-          goals.push({ x, y });
-          break;
-        case ".":
-          goals.push({ x, y });
-          break;
-        case "$":
-          boxes.push({ x, y });
-          break;
-        case "*":
-          // 箱子在目标格：同时进 boxes + goals
-          boxes.push({ x, y });
-          goals.push({ x, y });
-          break;
-        case " ":
-          // 地板：无需记录。
-          break;
-        default:
-          // 其它字符按地板处理（兼容宽松输入）。
-          break;
+/**
+ * 为 parseLevel 抛错生成向后兼容的消息。
+ * MVP-2 测试 regex 匹配了 "缺少角色" / "多个角色" / "箱数" 等关键词，
+ * 此函数保持这些关键词在消息中出现。
+ */
+function parseLevelErrorMessage(issue: CheckIssue): string {
+  switch (issue.rule) {
+    case "player-count":
+      // MVP-2 分 "缺少角色" 与 "多个角色" 两种措辞
+      if (issue.message.includes("找到 0 个")) {
+        return "parseLevel: 关卡缺少角色 '@' 或 '+'（畸形输入）";
       }
-    }
+      // 多角色
+      return `parseLevel: 关卡含多个角色（畸形输入）`;
+    case "box-goal-imbalance":
+      return `parseLevel: 箱数 ≠ 目标数，畸形输入 — ${issue.message}`;
+    case "invalid-char":
+      return `parseLevel: ${issue.rule} — ${issue.message}`;
+    case "boundary-not-closed":
+      return `parseLevel: ${issue.rule} — ${issue.message}`;
+    default:
+      return `parseLevel: ${issue.rule} — ${issue.message}`;
   }
-
-  // base 契约：恰一个角色（@ 或 +）
-  if (players.length === 0) {
-    throw new Error("parseLevel: 关卡缺少角色 '@' 或 '+'（畸形输入）");
-  }
-  if (players.length > 1) {
-    throw new Error(`parseLevel: 关卡含多个角色（找到 ${players.length} 个，畸形输入）`);
-  }
-
-  // base 契约：箱数 = 目标数（允许 0=0 合法特例）
-  if (boxes.length !== goals.length) {
-    throw new Error(
-      `parseLevel: 箱数（${boxes.length}）≠ 目标数（${goals.length}），畸形输入`,
-    );
-  }
-
-  return { width, height, walls, goals, player: players[0], boxes };
 }
 
 // ── 派生函数 ────────────────────────────────────────────────

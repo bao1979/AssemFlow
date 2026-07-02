@@ -1,4 +1,5 @@
 // Feature: sokoban-mvp-2-push, EXAMPLE: assemble-push 端到端（含通关一步）
+// Feature: sokoban-mvp-3-levels, EXAMPLE: assemble-push · level-push-big 通关（AC 1.2 大关卡可通关证据）
 /**
  * 端到端测试：加载 push.jsonc + createPushRegistry，构造一个 2-box 2-goal 小地图，
  * 通过 stepPush 驱动一段完整解法序列直到 won=true。
@@ -164,5 +165,98 @@ describe("assemble-push 端到端", () => {
       expect(result.nextGrid.goals).toEqual(initial.goals);
       grid = result.nextGrid;
     }
+  });
+});
+
+// ── level-push-big 通关序列 ─────────────────────────────────
+
+import { parseLevel, assertPublishableLevel } from "../src/grid.js";
+import bigLevelRaw from "../src/levels/publishable/level-push-big.txt?raw";
+
+/**
+ * 从 `level-push-big.txt` 用 ?raw import 读入地图文本。
+ * Vitest 在 node 模式下不支持 ?raw，用 readFileSync 回退。
+ */
+function loadBigLevelText(): string {
+  if (typeof bigLevelRaw === "string" && bigLevelRaw.length > 0) {
+    return bigLevelRaw;
+  }
+  // fallback：直接读文件
+  return readFileSync(
+    resolve(__dirname, "../src/levels/publishable/level-push-big.txt"),
+    "utf-8",
+  );
+}
+
+describe("assemble-push · level-push-big 通关序列（EXAMPLE）", () => {
+  const bigLevelText = loadBigLevelText();
+  const initialGrid = parseLevel(bigLevelText);
+
+  it("过 assertPublishableLevel 门禁（≥2 箱 ≥2 目标 + 开局非通关）", () => {
+    expect(() => assertPublishableLevel(initialGrid)).not.toThrow();
+    expect(initialGrid.boxes.length).toBeGreaterThanOrEqual(2);
+    expect(initialGrid.goals.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("网格 ≥10×10", () => {
+    expect(initialGrid.width).toBeGreaterThanOrEqual(10);
+    expect(initialGrid.height).toBeGreaterThanOrEqual(10);
+  });
+
+  it("完整通关序列驱动 stepPush 到 won === true", () => {
+    /**
+     * 12×11 地图（2 箱 2 目标）解法序列：17 步。
+     *
+     * 地图布局：
+     *   ############
+     *   #          #
+     *   #  ####    #
+     *   #  #.      #   目标(4,3)
+     *   #  #   $   #   箱(7,4)
+     *   #  #       #
+     *   #  #####   #
+     *   #      .   #   目标(7,7)
+     *   #    $     #   箱(5,8)
+     *   #   @      #   玩家(4,9)
+     *   ############
+     *
+     * 策略：先把箱(5,8)推到目标(7,7)，再把箱(7,4)推到目标(4,3)。
+     */
+    const solution: Direction[] = [
+      "up",    // 1: 走 (4,9)→(4,8)
+      "right", // 2: 推箱 (5,8)→(6,8)
+      "right", // 3: 推箱 (6,8)→(7,8)
+      "down",  // 4: 走 (6,8)→(6,9)
+      "right", // 5: 走 (6,9)→(7,9)
+      "up",    // 6: 推箱 (7,8)→(7,7) ← 第一箱到位
+      "right", // 7: 走 (7,8)→(8,8)
+      "up",    // 8: 走 (8,8)→(8,7)
+      "up",    // 9: 走 (8,7)→(8,6)
+      "up",    // 10: 走 (8,6)→(8,5)
+      "up",    // 11: 走 (8,5)→(8,4)
+      "left",  // 12: 推箱 (7,4)→(6,4)
+      "left",  // 13: 推箱 (6,4)→(5,4)
+      "left",  // 14: 推箱 (5,4)→(4,4)
+      "down",  // 15: 走 (5,4)→(5,5)
+      "left",  // 16: 走 (5,5)→(4,5)
+      "up",    // 17: 推箱 (4,4)→(4,3) ← 第二箱到位，通关！
+    ];
+
+    let grid = initialGrid;
+    let lastResult: { won: boolean } = { won: false };
+
+    for (let i = 0; i < solution.length; i++) {
+      const result = stepPush(pushConfig, registry, grid, solution[i]);
+      grid = result.nextGrid;
+      lastResult = result;
+
+      // 除最后一步外，won 均为 false
+      if (i < solution.length - 1) {
+        expect(result.won).toBe(false);
+      }
+    }
+
+    // 末步 won === true
+    expect(lastResult.won).toBe(true);
   });
 });

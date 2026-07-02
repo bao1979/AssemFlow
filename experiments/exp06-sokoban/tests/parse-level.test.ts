@@ -22,7 +22,7 @@ import {
   type GridState,
   type Position,
 } from "../src/grid.js";
-import levelPushRaw from "../src/levels/level-push-1.txt?raw";
+import levelPushRaw from "../src/levels/publishable/level-push-1.txt?raw";
 
 // ── 辅助 ─────────────────────────────────────────────────────
 
