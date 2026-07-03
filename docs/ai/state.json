@@ -2,9 +2,9 @@
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
   "updatedAt": "2026-07-03",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口，MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。**MVP-4 已归档（D-015，2026-07-03）**——项目重心从「Sokoban 链验证扩容」切换到「证据深化 + 外部曝光」（候选下一步：交付物 A 的 AI 实测提示词包 / 演化实证 / 第二场景验证）。",
-  "phase": "范式验证-Sokoban 链收官（MVP-1/2/3 完成，MVP-4 归档），待选下一步方向",
-  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015，deferred，重启触发条件见 decisions-archive.json）。引擎以 Godot 为词汇参照（借 Scene/Resource/Input 映射，拒帧tick/Node继承/Signal）。当前项目瓶颈在三处：Q-003（AI 产配置零证据）/ Q-001（演化可靠性零证据）/ 证据集中在 Sokoban 一个场景。下一步方向由 Plucker518 选择（候选：交付物 A / 演化实证 / 第二场景）。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口，MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。**MVP-4 已归档（D-015，2026-07-03）**。**交付物 A 首条实测已完成（2026-07-03）**：B-01 加冰面地形（含追问一轮）✅ 通过底线（★★★☆☆）、暴露两条稳定错误 pattern——(1) 契约完备性局部化（改字符集不主动扫其它 check.ts 规则）(2) 无产品级考量（字符选择只顾合法唯一、不顾可读易看混）。详见 docs/agent-test-prompts.md「已回填记录 · 轮次 B-01」。上下文包 docs/agent-test-context.md 暂不修改，保持跨模型对比公正性；跑够 3 家后再定是否补入 pattern 提醒。",
+  "phase": "交付物 A 首条实测完成，待 C/A 补齐 + 跨模型对比",
+  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015）。引擎以 Godot 为词汇参照。Studio 长期方向已选：**面向想做网页小游戏的非程序员，对标 GDevelop**（AFP 甜区在回合制 + 事件驱动实时，A+B 档；不做 60fps 动作类）——具体规划留在 Studio 战略稿（尚未开）。当前项目瓶颈：Q-003（B-01 首条实测已完成、暴露两条错误 pattern：契约完备性局部化 + 无产品级考量；需 A/C 提示词补齐 + 跨模型对比再定阈值）/ Q-001（演化零证据）/ 证据集中在 Sokoban 一个场景。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -57,14 +57,16 @@
     { "id": "D-015", "decision": "MVP-4 归档（deferred），Sokoban 验证链就此收官。项目重心从「验证扩容」切换到「证据深化 + 外部曝光」——具体转向由 Plucker518 选择（当前候选：交付物 A 的 AI 实测提示词包）。归档理由与重启触发条件见 docs/ai/decisions-archive.json D-015。" }
   ],
   "nextSteps": [
-    "Sokoban 链已收官（MVP-1/2/3 完成、MVP-4 归档 D-015）。当前状态清晰、可对外发表",
-    "候选下一步 · 选项 1（推荐）：起草 docs/agent-test-prompts.md 骨架（3-5 条提示词）+ 找 Claude/GPT 实跑一遍——直击 Q-003 空档、8-16 小时可产出首个 AI 实测数据（成功/失败同价）",
-    "候选下一步 · 选项 2：Q-001 演化实证——挑 exp01 一个块做 breaking change，看能否 codemod 迁移；偿还项目最大诚实债",
-    "候选下一步 · 选项 3：第二个场景（非 Sokoban）——工作流引擎 / 数据管道 mini AFP 验证，防过拟合质疑（工作量最大，40+ 小时）",
-    "外部曝光（贯穿）：项目改 Public、录一张动图放 README 顶部、起草一篇发表文章《AFP · 从 Sokoban 学到的 3 件事》"
+    "**下一步 · 先跑 C（修 bug 关卡）**：最短用例（5-10 分钟），先摸模型对 CLI 报错定位 + 坐标推理的手感——若 C 也过底线，说明模型在 AFP 三层分工下的正面表现稳定",
+    "**紧跟 · 跑 A（加一关）**：Studio 未来最核心用例——'非程序员用 AI 加关卡'的直接投影；A 的错误 pattern 决定 Studio v0.1 的 AI 交互形态",
+    "**再跟 · 换家跑 B（跨模型对比）**：同一版 agent-test-context.md、同一条 B 提示词、不追问，看 B-01 的两条 pattern（契约完备性局部化 / 无产品级考量）是否跨模型稳定复现；3 家复现→触发 context.md § 11 补 pattern 提醒",
+    "**Q-003 触发 resolved 的判据**：A/B/C 至少覆盖 2 家模型 + 首批错误 pattern 稳定（连续 2 条同类）→ 汇总一次分析（docs/agent-test-prompts.md 汇总模板），据此改进上下文包 / 提示词或宣告 verified/falsified",
+    "**并行 · Studio 战略稿**（可选）：Plucker518 想开 Studio 时，先起 docs/studio-strategy.md 稿子——定位（对标 GDevelop）、场景边界（A+B 档：回合制 + 事件驱动实时）、能力清单深度",
+    "候选下一步 · Q-001 演化实证（20-40h）/ 第二个场景 mini AFP 验证（40+h）",
+    "外部曝光（贯穿）：README 顶部动图、首发文章、GitHub Issues 拆分"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025；in_progress：Q-026（MVP-0 完成、阶段性默认 A、非终局）、Q-028（MVP-1/2/3 兑现判据 1+3；判据 2/4 转独立工作项——MVP-4 归档见 D-015、判据 4 由交付物 A 独立推进）；已 resolved：Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景：主循环留外部、引擎守纯 DAG；更广义动态边界循环 deferred）。项目当前最缺的三块证据：Q-003（AI 产配置）/ Q-001（演化）/ 第二场景（防过拟合）。"
+    "详见 docs/open-questions.md。当前 open：Q-001~Q-002、Q-004、Q-006~Q-020、Q-024、Q-025；in_progress：Q-003（交付物 A 首条实测 B-01 已完成 2026-07-03，暴露两条错误 pattern，待 A/C 补齐 + 跨模型对比）、Q-026（MVP-0 完成、阶段性默认 A、非终局）、Q-028（MVP-1/2/3 兑现判据 1+3；判据 2/4 转独立工作项——MVP-4 归档见 D-015、判据 4 由交付物 A 独立推进）；已 resolved：Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景）。项目当前最缺的两块证据（Q-003 首批数据在跑）：Q-001（演化）/ 第二场景（防过拟合）。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },
