@@ -3,6 +3,21 @@
 > Spec: sokoban-mvp-4-tuning · MVP-4 of the Sokoban paradigm-validation chain.
 > 全局共识、术语、Godot 参照、范式标记约定见 `docs/paradigm-validation-sokoban-roadmap.md`。
 
+## ⏸ 归档状态（Deferred · 2026-07-03）
+
+**本 spec 已归档，不在当前推进队列内。** 决策见 `docs/ai/decisions-archive.json` D-015。
+
+**归档理由（简述）**：MVP-3 完成后，项目当前瓶颈不在 MVP-4 的边际证据（撤销引入 1 处 `@paradigm` 大概率成立、边际信息量小），而在三个更大的缺口——AI 产配置零实证（Q-003）、演化可靠性零实证（Q-001）、证据集中在 Sokoban 一个场景。继续做 MVP-4 会挤占这三条更关键路径的时间。
+
+**触发重启条件**（满足任一即可重启）：
+1. 外部读者反馈 `docs/paradigm-comparison.md` 的对比表证据不足
+2. 出现真实业务场景需要撤销 / 时间维度状态且想用 AFP 表达
+3. 交付物 A（AI 实测提示词包）显示 LLM 产不出撤销机制的合规配置——那时撤销 spec 有独立验证价值
+
+**保留本文档的原因**：需求分析本身有教学价值（"三选一诚实结论"框架、reducer/有状态块的边界讨论）；重启时不必从零起。
+
+---
+
 ## Introduction
 
 Sokoban 范式验证链的收尾站，对应 `open-questions.md` 的 **Q-028**。

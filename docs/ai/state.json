@@ -1,10 +1,10 @@
 {
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
-  "updatedAt": "2026-07-02",
+  "updatedAt": "2026-07-03",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md，拆成 5 个 MVP spec）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口。MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。MVP-4 精简版待推进：撤销 + @paradigm 判据实证（maxMoves 附加）。",
-  "phase": "范式验证-Sokoban MVP-3 多关+独立check完成",
-  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。终极标的 Sokoban 已拆成 MVP 链并分文档落地：全局路线图 `docs/paradigm-validation-sokoban-roadmap.md`；5 个独立 spec `.kiro/specs/sokoban-mvp-{0..4}-*`（MVP-0 K-STATE 红绿灯 / MVP-1 走路含 K-LOOP / MVP-2 推箱子 / MVP-3 关卡集+check（精简版）/ MVP-4 撤销+@paradigm 判据实证（精简版））。引擎以 Godot 为词汇参照（借 Scene/Resource/Input 映射，拒帧tick/Node继承/Signal）。AI 介入改为提示词自测包，不做自动验收。MVP-3/4 已改精简版自己推进（原留社区计划已撤销，见 D-014 修订）。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口，MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。**MVP-4 已归档（D-015，2026-07-03）**——项目重心从「Sokoban 链验证扩容」切换到「证据深化 + 外部曝光」（候选下一步：交付物 A 的 AI 实测提示词包 / 演化实证 / 第二场景验证）。",
+  "phase": "范式验证-Sokoban 链收官（MVP-1/2/3 完成，MVP-4 归档），待选下一步方向",
+  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015，deferred，重启触发条件见 decisions-archive.json）。引擎以 Godot 为词汇参照（借 Scene/Resource/Input 映射，拒帧tick/Node继承/Signal）。当前项目瓶颈在三处：Q-003（AI 产配置零证据）/ Q-001（演化可靠性零证据）/ 证据集中在 Sokoban 一个场景。下一步方向由 Plucker518 选择（候选：交付物 A / 演化实证 / 第二场景）。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -32,12 +32,12 @@
         "exp02-boundary": { "status": "Done", "notes": "边界已划清。条件密集的规则变更不在 AFP 甜区。" },
         "exp03-reuse": { "status": "Done", "notes": "封装+复用假设均为真。" },
         "exp04-k-state": { "status": "Done", "notes": "MVP-0 = Q-026 K-STATE：红绿灯状态机 A/B 状态承载对比，typecheck 0 错、16 测试全过、A 路端到端跑通。阶段性默认起点选 A（调用方持久化），非终局、待 MVP-1 大状态复审。详见 experiments/exp04-k-state/REPORT.md" },
-        "exp06-sokoban": { "status": "InProgress", "notes": "MVP-1~4 = Q-028 Sokoban。MVP-1 走路已落地；**MVP-2 推箱 + 胜利判定已落地**（typecheck 0 错 / 94 测试全过；推箱 + 胜利判定 + 发表闸口硬约束；方案 A 沿用未触发复审；@paradigm 恰 1 处 main.ts，业务层零命中；真人浏览器验收通过；docs/paradigm-comparison.md 骨架已落地）。**MVP-3 多关+独立check已落地**（22 文件 173 测试全过、3 关关卡集 + base check 工具 + URL 切关、typecheck 0 错、SMOKE 三项达标：@paradigm 恰 1 处 / Property 1/6 tautology 守卫 / R1.4 架构不变量零改动）。MVP-4 待推进。不单设 exp05。" }
+        "exp06-sokoban": { "status": "Done (Sokoban chain wrapped)", "notes": "MVP-1/2/3 = Q-028 Sokoban 甜区证据链完整。MVP-1 走路 + MVP-2 推箱 + 胜利判定 + MVP-3 3 关关卡集 + base check 工具 + URL 切关，共 22 文件 173 测试全过、typecheck 0 错、真人浏览器三关验收通过、CLI 四份关卡冒烟通过、SMOKE 三项达标（@paradigm 恰 1 处 / Property 1/6 tautology 守卫 / R1.4 架构不变量零改动）。**MVP-4 已归档（D-015，2026-07-03）**：撤销机制的边际证据价值低于 Q-003/Q-001/第二场景三条路径，Sokoban 链就此收官。不单设 exp05。" }
       }
     },
     "spec-paradigm-validation-sokoban": {
-      "status": "InProgress",
-      "notes": "已拆分落地：全局路线图 docs/paradigm-validation-sokoban-roadmap.md + 5 个独立 MVP spec（.kiro/specs/sokoban-mvp-0..4）。MVP-0、MVP-1、**MVP-2 已落地实现**（MVP-2 推箱 + 胜利判定 + 发表闸口硬约束，typecheck 0 错 / 94 测试全过 / 真人浏览器验收通过）；**MVP-3 已落地实现**（3 关关卡集 + base 静态 check 独立工具 + URL 切关，22 文件 173 测试全过 / SMOKE 三项达标 / 真人浏览器三关验收通过 / CLI 四份关卡冒烟通过）；发表闸口就绪（D-014 checklist 走查完成、paradigm-comparison.md 骨架已落地）。MVP-4 待推进：撤销 + @paradigm 判据实证（maxMoves 降为附加·可跳过）。验证 AFP / 混合范式在网格回合制游戏上的适配度。"
+      "status": "Wrapped (MVP-4 archived)",
+      "notes": "全局路线图 docs/paradigm-validation-sokoban-roadmap.md。MVP-0/1/2/3 已落地实现（MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关，22 文件 173 测试全过 / SMOKE 三项达标 / 真人浏览器三关验收通过 / CLI 四份关卡冒烟通过）；发表闸口就绪。**MVP-4 已归档（D-015，2026-07-03）**——判据 2/4 转移到独立工作项（判据 2 等真实业务场景重启；判据 4 由交付物 A 独立推进）。Sokoban 链的甜区证据链已完整，项目重心转到证据深化（Q-003 AI 实证 / Q-001 演化实证 / 第二场景防过拟合）。"
     }
   },
   "decisions": [
@@ -53,17 +53,18 @@
     { "id": "D-011", "decision": "规模化路线 = 封装现成库为块（npm 即装配块原料库）。" },
     { "id": "D-012", "decision": "块的业务校验失败通过 throw Error 表达；引擎统一 catch 转为 AssembleResult.error。" },
     { "id": "D-013", "decision": "项目目标升级：从「证明 AFP 成立」转为「寻找 AI 介入模式下的更优编程范式」。允许混合 AFP + reducer/状态机/ECS/行为树等。终极验证标的 = Sokoban 网页游戏。" },
-    { "id": "D-014", "decision": "发表与招人策略：发表闸口设在 MVP-2（有可玩 demo 即对外发布，不等全链做完）；根 README 反转为对外门面（已改）。**2026-07 修订**：MVP-3/4 原留社区计划已撤销，改为精简版自己推进——MVP-3 从 5 关压缩到 3 关 + 独立 check 工具，MVP-4 重心从 maxMoves 移到「撤销 + @paradigm 判据实证」（maxMoves 降为附加·可跳过）；交付物 A（AI 实测提示词自测包）仍是最需要外部参与的一档。发表前 checklist 见 docs/paradigm-validation-sokoban-roadmap.md「发表与招人策略」节。" }
+    { "id": "D-014", "decision": "发表与招人策略：发表闸口设在 MVP-2（有可玩 demo 即对外发布，不等全链做完）；根 README 反转为对外门面（已改）。**2026-07 修订**：MVP-3/4 原留社区计划已撤销，改为精简版自己推进——MVP-3 从 5 关压缩到 3 关 + 独立 check 工具，MVP-4 重心从 maxMoves 移到「撤销 + @paradigm 判据实证」（maxMoves 降为附加·可跳过）；交付物 A（AI 实测提示词自测包）仍是最需要外部参与的一档。发表前 checklist 见 docs/paradigm-validation-sokoban-roadmap.md「发表与招人策略」节。" },
+    { "id": "D-015", "decision": "MVP-4 归档（deferred），Sokoban 验证链就此收官。项目重心从「验证扩容」切换到「证据深化 + 外部曝光」——具体转向由 Plucker518 选择（当前候选：交付物 A 的 AI 实测提示词包）。归档理由与重启触发条件见 docs/ai/decisions-archive.json D-015。" }
   ],
   "nextSteps": [
-    "MVP-3 多关+独立check已交付 → 判据 1（加关卡=加数据）的证据链已兑现（PUBLISHABLE_LEVELS 从目录派生、CLI 工具能脱浏览器判定合法性）",
-    "MVP-4 精简版：撤销 + @paradigm 判据实证（主要）——目标是 paradigm-comparison.md 从 1 处证据扩到 2 处（三选一诚实结论）+ 判据 2（一个配置值改行为、块零改动）的证据",
-    "发布后短期（1-2 周）建议：起草 docs/agent-test-prompts.md 骨架（3-5 条提示词）—— 交付物 A 是最缺 0 数据的一档",
-    "Q-001（演化）建议在 open-questions.md 显式改为 deferred——目前是项目最大的诚实债",
-    "Q-024 inputMap 表达力增强仍可并行"
+    "Sokoban 链已收官（MVP-1/2/3 完成、MVP-4 归档 D-015）。当前状态清晰、可对外发表",
+    "候选下一步 · 选项 1（推荐）：起草 docs/agent-test-prompts.md 骨架（3-5 条提示词）+ 找 Claude/GPT 实跑一遍——直击 Q-003 空档、8-16 小时可产出首个 AI 实测数据（成功/失败同价）",
+    "候选下一步 · 选项 2：Q-001 演化实证——挑 exp01 一个块做 breaking change，看能否 codemod 迁移；偿还项目最大诚实债",
+    "候选下一步 · 选项 3：第二个场景（非 Sokoban）——工作流引擎 / 数据管道 mini AFP 验证，防过拟合质疑（工作量最大，40+ 小时）",
+    "外部曝光（贯穿）：项目改 Public、录一张动图放 README 顶部、起草一篇发表文章《AFP · 从 Sokoban 学到的 3 件事》"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025、Q-028；in_progress：Q-026（MVP-0 完成，得阶段性默认 A，非终局）、Q-028（MVP-3 已兑现判据 1 部分证据：加关卡=加数据+独立CLI校验；判据 2/4 待 MVP-4）；已 resolved：Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景：主循环留外部、引擎守纯 DAG；更广义动态边界循环 deferred）。重点议题 Q-026/027/028 直接对应 paradigm-validation-sokoban 的三个 milestone。"
+    "详见 docs/open-questions.md。当前 open：Q-001~Q-004、Q-006~Q-020、Q-024、Q-025；in_progress：Q-026（MVP-0 完成、阶段性默认 A、非终局）、Q-028（MVP-1/2/3 兑现判据 1+3；判据 2/4 转独立工作项——MVP-4 归档见 D-015、判据 4 由交付物 A 独立推进）；已 resolved：Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景：主循环留外部、引擎守纯 DAG；更广义动态边界循环 deferred）。项目当前最缺的三块证据：Q-003（AI 产配置）/ Q-001（演化）/ 第二场景（防过拟合）。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },

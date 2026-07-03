@@ -1,12 +1,23 @@
 {
   "_doc": "已退场（无后续约束力）的历史决策归档。默认不读取，仅追溯历史时按需读取。",
-  "updatedAt": "2026-06-24",
+  "updatedAt": "2026-07-03",
   "archived": [
     {
       "id": "D-003",
       "decision": "继承自 clawerworld 的 content-separation.md 改写为 AFP「装配块纯度规范」、test-and-acceptance.md 改写为 AFP 四层测试体系。",
       "archivedReason": "一次性改写动作已完成，无后续约束力。",
       "source": "脚手架搭建"
+    },
+    {
+      "id": "D-015",
+      "decision": "MVP-4（撤销 + @paradigm 判据实证）归档为 deferred，Sokoban 验证链就此收官。项目重心从「验证扩容」切换到「证据深化 + 外部曝光」两条腿——具体转向由后续 Track B 决定（当前候选：交付物 A 的 AI 实测提示词包）。",
+      "archivedReason": "MVP-3 完成后诚实评估：MVP-4 的撤销机制大概率触发 1 处 @paradigm，结论（合理边界）几乎可预知；边际证据价值低。项目真正瓶颈在别处——Q-003 AI 产配置零证据（这是「AI 时代范式」卖点的空档）、Q-001 演化可靠性零证据（项目自认最大诚实债）、所有证据集中在 Sokoban 一个场景（易被质疑过拟合）。继续 MVP-4 会挤占这三条更关键路径的时间。",
+      "source": "Sokoban 验证链推进期决策；MVP-3 后诚实盘点",
+      "reopenTriggers": [
+        "外部读者反馈 paradigm-comparison.md 对比表证据不足",
+        "出现真实业务场景需要撤销 / 时间维度状态且想用 AFP 表达",
+        "交付物 A（AI 实测）显示 LLM 产不出撤销机制的合规配置——那时撤销 spec 有独立验证价值"
+      ]
     }
   ]
 }

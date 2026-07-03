@@ -803,3 +803,60 @@ export const PUBLISHABLE_LEVELS: ReadonlySet<string> = new Set(Object.keys(publi
 | `tests/resolve-level.test.ts` | URL 分派器 8 tests（含 PBT Property 7） | — |
 | `tests/main-url-loading.test.ts` | bootstrap 装载 + 回退 4 tests | — |
 | `tests/generators.ts` | fast-check 生成器（共享基础设施） | — |
+
+
+---
+
+# Sokoban 链收官（MVP-4 归档 · 2026-07-03）
+
+> 决策：`docs/ai/decisions-archive.json` D-015。
+> MVP-4 spec 保留但标记 deferred（顶部有醒目归档说明与重启触发条件），不删除、方便重启时不必从零起。
+
+## 归档理由（简述）
+
+MVP-3 完成后诚实盘点，MVP-4 的边际证据价值低于三条其它路径：
+
+| 对比项 | MVP-4（撤销 + @paradigm 判据实证） | 项目当前更缺的证据 |
+| :--- | :--- | :--- |
+| 结论可预知度 | 高——撤销大概率触发 1 处 `@paradigm`（合理边界） | Q-003 / Q-001 / 第二场景全部零证据 |
+| 从 1 处到 2 处证据的说服力 | 有限（同场景同模式的第二例） | 完全新的证据类型 |
+| 工作量 | ~20-40 小时 | Q-003 首个实测 8-16 小时 |
+| 对"AI 时代范式"核心卖点的贡献 | 弱（撤销与 AI 产配置无直接关系） | 强（Q-003 是核心卖点空档） |
+
+**继续 MVP-4 会挤占三条更关键路径**：Q-003 AI 产配置零实证、Q-001 演化可靠性零实证、证据集中在 Sokoban 一个场景。
+
+## Sokoban 链最终产出（截止 MVP-3）
+
+- **可玩 demo**：3 关 URL 切换、CLI 独立校验工具、真人浏览器验收通过、22 文件 173 测试全绿
+- **AFP 甜区证据**：`网格回合制核心玩法（走路 + 推箱 + 胜利判定）` 完全在纯 AFP 数据流内，业务/装配层零 `@paradigm` 标记
+- **AFP 边界证据**：`回合门控 / 终局输入拦截 / R 重开` 恰 1 处 `@paradigm NON-AFP: external-control-flow` 在 `main.ts`——合理边界
+- **加内容 = 加数据的证据**：`PUBLISHABLE_LEVELS` 从目录派生（`new Set(Object.keys(publishable))`），新增关卡代码零改动
+- **引擎作为 CAD 工具**：`checkLevel` 纯函数 + 薄壳 CLI 实现"不装载即可判定关卡合法性"
+- **paradigm-comparison.md 首要证据点**：1 处正面证据、1 处合理边界（`docs/paradigm-comparison.md`）
+
+## Q-028 状态收敛
+
+- **判据 1**（加关卡=加数据、引擎零改动）：✅ MVP-3 兑现
+- **判据 2**（一个配置值改行为、块零改动）：⏸ 转独立工作项——等真实业务场景引入 maxMoves-like 机制时再验
+- **判据 3**（`@paradigm` 标记汇成清单）：✅ MVP-1/2/3 一致证据（恰 1 处、业务层零命中）
+- **判据 4**（AI 介入由提示词自测包支撑）：⏸ 转独立工作项——由**交付物 A（`docs/agent-test-prompts.md`）**独立推进
+
+**Q-028 状态**：`in_progress`（主问题已部分回答；剩余判据 2 与 4 不在本 spec 内验证）。
+
+## MVP-4 重启触发条件
+
+满足任一即可重启（见 `.kiro/specs/sokoban-mvp-4-tuning/requirements.md` 顶部归档说明与 `docs/ai/decisions-archive.json` D-015）：
+
+1. 外部读者反馈 `docs/paradigm-comparison.md` 对比表证据不足
+2. 出现真实业务场景需要撤销 / 时间维度状态且想用 AFP 表达
+3. 交付物 A（AI 实测）显示 LLM 产不出撤销机制的合规配置——那时撤销 spec 有独立验证价值
+
+## 项目下一步方向（Track B 三选一）
+
+Sokoban 链收官后，项目重心从"验证扩容"切换到"证据深化 + 外部曝光"。候选三选一（不叠加）：
+
+1. **交付物 A · AI 实测提示词包**（推荐）——8-16 小时投入，直击 Q-003 空档；成功/失败都是首个 AI 实测数据
+2. **Q-001 演化实证**——挑 exp01 一个块做 breaking change，看 codemod 迁移能力；偿还项目最大诚实债
+3. **第二个场景**（非游戏）——工作流引擎 / 数据管道 mini AFP 验证，防"过拟合 Sokoban"质疑；工作量最大（40+ 小时）
+
+外部曝光贯穿三选一：项目改 Public、录一张动图放 README 顶部、起草一篇发表文章《AFP · 从 Sokoban 学到的 3 件事》。

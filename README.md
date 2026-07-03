@@ -22,7 +22,7 @@
 
 三种入口，选一个进：
 
-### 能玩 · Sokoban 推箱子（MVP-2 已交付，发表闸口达标）
+### 能玩 · Sokoban 推箱子（MVP-3 已交付，3 关 + 独立校验 + URL 切关）
 
 ```powershell
 cd experiments/exp06-sokoban
@@ -30,7 +30,13 @@ npm install
 npm run dev
 ```
 
-浏览器打开显示的地址：方向键 / WASD 推箱子，把所有 `$` 推到 `.` 上（变成 `*`）即胜利，按 R 重开。**核心玩法 = 一个"走+推"纯装配块 + 一个"胜利判定"纯装配块 + 一份两步装配流配置**——教程第 12 课会把这条动线拆开讲。
+浏览器打开显示的地址：方向键 / WASD 推箱子，把所有 `$` 推到 `.` 上（变成 `*`）即胜利，按 R 重开。URL 可切关：`?level=level-push-1`（小关）/ `?level=level-push-big`（大关）/ `?level=level-walk-only`（走路对照）。**核心玩法 = 一个"走+推"纯装配块 + 一个"胜利判定"纯装配块 + 一份两步装配流配置**——教程第 12 课会把这条动线拆开讲。
+
+独立校验工具（不启浏览器即可判定关卡合法性）：
+
+```powershell
+npm run check-level -- src/levels/publishable/level-push-big.txt
+```
 
 ### 能跑 · 引擎与验证实验
 
@@ -92,9 +98,11 @@ flowchart LR
 | :--- | :--- | :--- |
 | MVP-0 | 状态机（红绿灯）状态承载对比 | ✅ 已完成（[REPORT](experiments/exp04-k-state/REPORT.md)） |
 | MVP-1 | 走路 + 渲染 | ✅ 已完成（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-1-走路报告k-loop-结论--全量状态穿透观察)） |
-| **MVP-2** | **推箱子 + 胜利判定** | **✅ 已完成 · 发表闸口达标**（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-2-推箱报告推箱--胜利判定--发表闸口)） |
-| MVP-3 | 3 关关卡集 + 独立静态校验工具 | 🕒 计划推进（精简版） |
-| MVP-4 | 撤销 + `@paradigm` 判据实证（maxMoves 附加） | 🕒 计划推进（精简版） |
+| MVP-2 | 推箱子 + 胜利判定 | ✅ 已完成 · 发表闸口达标（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-2-推箱报告推箱--胜利判定--发表闸口)） |
+| **MVP-3** | **3 关关卡集 + 独立静态校验工具 + URL 切关** | **✅ 已完成**（[REPORT](experiments/exp06-sokoban/REPORT.md#mvp-3-多关--独立校验报告3-关稳定重复--base-check-工具--url-切关)） |
+| ~~MVP-4~~ | ~~撤销 + `@paradigm` 判据实证~~ | ⏸ **已归档**（[D-015 · 2026-07-03](docs/ai/decisions-archive.json)） |
+
+Sokoban 链就此收官。MVP-4 归档理由：撤销机制的结论（大概率触发 1 处 `@paradigm`）几乎可预知、边际证据价值低；项目瓶颈在 Q-003 AI 产配置 / Q-001 演化 / 场景多样性三处，继续 MVP-4 会挤占更关键路径。重启触发条件见 `.kiro/specs/sokoban-mvp-4-tuning/requirements.md` 顶部归档说明。
 
 ## 想参与？
 

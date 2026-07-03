@@ -6,7 +6,7 @@
 > can we keep AI on the design side and keep runtime execution fully deterministic?
 
 **Current status:** research prototype, not a production promise.  
-The project has completed **Sokoban MVP-2**: a playable browser demo with pushing, win detection, and explicit evidence about where AFP works and where it does not.
+The project has completed **Sokoban MVP-3**: a playable browser demo with multiple levels, a standalone static checker, and URL-based level switching — building on the pushing and win detection delivered in MVP-2.
 
 ---
 
@@ -46,6 +46,13 @@ Open the local URL printed by Vite.
 Use arrow keys or `WASD` to move.
 Push every `$` onto `.` so that it becomes `*`.
 Press `R` to reset.
+Switch levels via URL: `?level=level-push-1` (small) / `?level=level-push-big` (large) / `?level=level-walk-only` (walk-only reference).
+
+Standalone level checker (no browser needed):
+
+```powershell
+npm run check-level -- src/levels/publishable/level-push-big.txt
+```
 
 Why this matters:
 
@@ -116,6 +123,7 @@ flowchart LR
 | MVP-0 | Where should long-lived state live? | Default starting point is caller-owned state (scheme A), not final | `experiments/exp04-k-state/REPORT.md` |
 | MVP-1 | Can walking and browser rendering stay deterministic with the loop outside the engine? | Confirmed for turn-based event-driven play | `experiments/exp06-sokoban/REPORT.md` |
 | MVP-2 | Can pushing and win detection still stay inside AFP data flow? | Confirmed for the core turn logic; control flow boundary remains outside | `experiments/exp06-sokoban/REPORT.md` |
+| MVP-3 | Can adding new levels be purely data-driven with no code changes? | Confirmed: 3 levels, directory-derived manifest, standalone checker, engine 0 changes | `experiments/exp06-sokoban/REPORT.md` |
 
 ---
 
@@ -130,15 +138,16 @@ The full roadmap is here:
 | MVP-0 | State-carrying comparison with a traffic light state machine | Done |
 | MVP-1 | Walking plus rendering | Done |
 | MVP-2 | Pushing plus win detection | Done |
-| MVP-3 | 3 levels + standalone static checker (scoped-down) | 🕒 Planned (scoped-down) |
-| MVP-4 | Undo + `@paradigm` judgment evidence (`maxMoves` as add-on, scoped-down) | 🕒 Planned (scoped-down) |
+| **MVP-3** | **3 levels + standalone static checker + URL level switching** | **Done** |
+| ~~MVP-4~~ | ~~Undo + `@paradigm` judgment evidence~~ | ⏸ **Archived** (D-015 · 2026-07-03) |
+
+The Sokoban chain is wrapped. MVP-4 was archived because the expected conclusion (undo would introduce roughly one `@paradigm` mark, i.e. a reasonable boundary) is largely predictable and the marginal evidence is low. The project's real bottlenecks are elsewhere: Q-003 (AI-authored configs, zero evidence), Q-001 (schema evolution, zero evidence), and scene diversity. Reopen triggers are documented in `docs/ai/decisions-archive.json` D-015 and at the top of `.kiro/specs/sokoban-mvp-4-tuning/requirements.md`.
 
 Important nuance:
 
-- **MVP-2 is complete as an implementation milestone**
-- **The final paradigm question is still open**
-- `Q-028` is not resolved yet, because MVP-3 and MVP-4 are still needed to test
-  "new content by pure data" and "behavior change by config only"
+- **MVP-3 is complete as an implementation milestone** (3 levels, standalone checker, URL switching)
+- **The final paradigm question is partially answered, not fully resolved**
+- `Q-028` is `in_progress` — MVP-1/2/3 delivered evidence for the AFP sweet spot in grid-based turn play plus "new content = new data". Criteria 2 (behavior change by config only) and 4 (AI-agent authored configs) are now tracked as **independent work items**, not as new Sokoban MVPs. MVP-4 has been archived (D-015).
 
 ---
 
@@ -147,17 +156,19 @@ Important nuance:
 ### Already strong
 
 - Deterministic engine core with explicit contracts
-- Browser-playable Sokoban MVP-2
+- Browser-playable Sokoban with 3 levels and URL switching (MVP-3)
 - Pure AFP blocks for move-and-push and win detection
-- Explicit `@paradigm` marking for non-AFP control flow
-- Test evidence plus implementation reports
+- Standalone static checker (`checkLevel`) with CLI — validates levels without a browser
+- "Add a level = add a file" proven across 3 levels with engine zero changes
+- Explicit `@paradigm` marking for non-AFP control flow (exactly 1 spot across 3 MVPs)
+- Test evidence plus implementation reports (22 files, 173 tests)
 
 ### Still open
 
 - Whether AFP remains the best shape when the problem becomes more dynamic
 - Whether AI agents can reliably author configs and content at scale
-- Whether larger Sokoban content sets still stay inside the same sweet spot
 - Whether `inputMap` and flow signatures will need stronger expression power
+- Whether "behavior change by config only" holds (evidence pending; MVP-4 was archived, this criterion moves to an independent work item)
 
 ---
 
@@ -186,8 +197,8 @@ Useful ways to contribute:
 - Read the docs and tell us where the reasoning is weak or unclear
 - Challenge the current boundary claims with real counterexamples
 - Try the Sokoban demo and report what is confusing or brittle
-- Help extend or refine the scoped-down MVP-3 and MVP-4 once initial versions ship
-- Run your own AI-agent experiments once the prompt pack is published
+- Contribute additional levels (see `CONTRIBUTING.md`)
+- Run your own AI-agent experiments once the prompt pack is published (this is now the highest-value external contribution)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the four ways to participate (from low-barrier feedback to code PRs).
 

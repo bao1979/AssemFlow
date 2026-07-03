@@ -606,7 +606,7 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 - **MVP-1**：走路 + 渲染（含 K-LOOP = Q-027）→ `.kiro/specs/sokoban-mvp-1-walk/`
 - **MVP-2**：推箱子 + 胜利判定 → `.kiro/specs/sokoban-mvp-2-push/`
 - **MVP-3**：3 关 ASCII 关卡集 + 静态校验 → `.kiro/specs/sokoban-mvp-3-levels/`
-- **MVP-4**：maxMoves 配置开关 + 撤销 → `.kiro/specs/sokoban-mvp-4-tuning/`
+- ~~**MVP-4**：maxMoves 配置开关 + 撤销 → `.kiro/specs/sokoban-mvp-4-tuning/`~~ ⏸ **已归档（deferred，D-015，2026-07-03）**
 
 引擎参照 Godot 的词汇（Scene/Resource/Input 映射），但拒绝其架构（帧 tick / Node 继承 / Signal）。
 
@@ -631,6 +631,12 @@ inputs?: TSchema; // 流自身的入参 schema，用 TypeBox 写
 - **判据 3 证据延续**：`grep "@paradigm" src/` 恰 1 处命中（`src/main.ts`），MVP-3 新增 `src/scan-ascii.ts` / `src/check.ts` / `src/levels-manifest.ts` 全零命中——业务/装配层持续零非AFP标记。
 - **关联既有缺口**：无新增引擎缺口。`parseLevel` 内部重构委托 `checkLevel` 后 MVP-2 全部 12 份测试零改动继续绿——SSOT 铁律 2 落实。
 - **判据 2（一个配置值改行为、块零改动）**必须等 MVP-4 才能验证。Q-028 改为 `in_progress`（判据 1+3 有证据、判据 2+4 待 MVP-4）。
+
+**Sokoban 链收官（2026-07-03，D-015）**：
+- **MVP-4 归档**（deferred）。理由见 `docs/ai/decisions-archive.json` D-015：MVP-4 撤销机制大概率触发 1 处 @paradigm（合理边界结论几乎可预知）、边际证据价值低；项目瓶颈在 Q-003 / Q-001 / 场景多样性，继续 MVP-4 会挤占更关键路径。
+- **判据 2、4 不在本 spec 内验证**——判据 2（配置改行为、块零改动）等待某次场景需要真正引入 maxMoves-like 机制时再验；判据 4（AI 介入）由交付物 A 独立推进（当前最有价值下一步）。
+- **Q-028 状态**：MVP-1/2/3 覆盖了"网格回合制核心玩法 + 加内容 = 加数据"的甜区证据；判据 1+3 已兑现；判据 2+4 明确为 `deferred / avoided`。**Q-028 可以视为「主问题部分回答、剩余判据转移到独立工作项」**——真正的"AI 时代范式是否成立"由交付物 A 后续实测回答，不再等 MVP-4。
+- **重启 MVP-4 的触发条件**：外部读者反馈证据不足 / 真实业务场景需要撤销 / 交付物 A 显示 LLM 产不出撤销配置——满足任一即可重启。
 
 ---
 
