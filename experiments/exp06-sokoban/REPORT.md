@@ -763,12 +763,12 @@ export const PUBLISHABLE_LEVELS: ReadonlySet<string> = new Set(Object.keys(publi
 | # | 状态 | 备注 |
 | :--- | :--- | :--- |
 | 1 | ✅ | MVP-1/2/3 完成；typecheck 0 错、22 文件 173 测试全绿 |
-| 2 | ✅ | 真人浏览器验收待 MVP-3 最终确认（程序化验证 4 tests passed；CLI 冒烟 5 tests passed） |
+| 2 | ✅ | 真人浏览器三关验收已通过；程序化验证 4 tests passed，CLI 冒烟 5 tests passed |
 | 3 | ✅ | `git clone` + `npm install && npm run dev` 即可跑；`?level=` 切关卡 |
 | 4 | ❌ | 可玩动图/截图尚未录入根 README 顶部（引用 MVP-2 结论） |
 | 5 | ❌ | 根 README 待补 Sokoban demo 跑法 / 动图（引用 MVP-2 结论） |
 | 6 | ✅ | Apache 2.0（引用 MVP-2 结论） |
-| 7 | ❌ | `CONTRIBUTING.md` 尚未完善（引用 MVP-2 结论） |
+| 7 | ✅ | `CONTRIBUTING.md` 已落地，覆盖如何加一关、如何跑测试、PR 规范 |
 | 8 | ❌ | GitHub Issues 拆分待做（引用 MVP-2 结论） |
 | 9 | ❌ | 首发平台未明确选定（引用 MVP-2 结论） |
 | 10 | ✅ | `docs/paradigm-comparison.md` 骨架已落地 |
@@ -779,7 +779,7 @@ export const PUBLISHABLE_LEVELS: ReadonlySet<string> = new Set(Object.keys(publi
 | :--- | :--- | :--- |
 | 3 关关卡集资产就位 | ✅ | CLI 4 次输出 + 173 测试绿 |
 | base check 独立校验工具可用 | ✅ | `check-level-cli.test.ts` 5 tests + CLI 实测 |
-| URL 切关浏览器 demo 可玩 | ✅ | `main-url-loading.test.ts` 4 tests + `resolve-level.test.ts` 8 tests；真人验收待最终确认 |
+| URL 切关浏览器 demo 可玩 | ✅ | `main-url-loading.test.ts` 4 tests + `resolve-level.test.ts` 8 tests；真人浏览器三关验收已通过 |
 
 ---
 

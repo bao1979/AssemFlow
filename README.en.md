@@ -1,12 +1,12 @@
-﻿﻿<!-- Derived from the Chinese README, which remains the source of truth. -->
+﻿﻿﻿<!-- Derived from the Chinese README, which remains the source of truth. -->
 
 # AssemFlow
 
-> A research project exploring a stricter alternative to "vibe coding":
+> A staged research project exploring a stricter alternative to "vibe coding":
 > can we keep AI on the design side and keep runtime execution fully deterministic?
 
-**Current status:** research prototype, not a production promise.  
-The project has completed **Sokoban MVP-3**: a playable browser demo with multiple levels, a standalone static checker, and URL-based level switching — building on the pushing and win detection delivered in MVP-2.
+**Current status:** staged wrap-up, not a production promise.  
+The repository has completed the Sokoban validation chain (**MVP-0/1/2/3**) and delivery A for `Q-003`. What remains here is the evidence trail, the still-open questions, and the candidate directions for the next chapter. This is not a claim that AFP has been fully proven; it is a staged research close-out with the strongest evidence currently available in the repository.
 
 ---
 
@@ -212,4 +212,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the four ways to participate (from lo
 - [Project state (SSOT)](docs/ai/state.json)
 - [Paradigm comparison notes](docs/paradigm-comparison.md)
 - [Core AFP discipline](.kiro/steering/afp-core.md)
-
