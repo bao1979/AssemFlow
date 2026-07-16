@@ -81,14 +81,16 @@ flowchart LR
     Engine --> Flow[装配流<br/>可复现 · 可审计]
 ```
 
-## 已有的证据链（四个实验）
+## 已有的证据链（四个实验 + Sokoban 链 + 交付物 A）
 
-| 实验 | 问题 | 结论 | 详情 |
+| 议题 | 问题 | 结论 | 详情 |
 | :--- | :--- | :--- | :--- |
 | 甜区 | AFP 在什么场景最贴？ | 假设为真，已端到端跑在引擎上 | `experiments/exp01-sweet-spot/` |
 | 边界 | 什么场景不该用 AFP？ | 条件密集的规则变更不在甜区 | `experiments/exp02-boundary/` |
 | 封装+复用 | 块能否干净封装并跨流复用？ | 假设为真 | `experiments/exp03-wrap-reuse/` |
 | 状态承载（MVP-0） | 长寿命状态存哪里？ | 阶段性默认"调用方持久化（A）" | `experiments/exp04-k-state/REPORT.md` |
+| Sokoban 链（MVP-1/2/3） | AFP 在网格回合制游戏上能走多远？ | 核心玩法完全在甜区、回合控制流是合理边界（1 处 `@paradigm`） | `experiments/exp06-sokoban/REPORT.md` |
+| **AI 产配置**（交付物 A · Q-003） | AI 能在 AFP 结构下产出合规配置吗？ | **✅ verified**（DeepSeek 单模型跨任务） · 硬边界纪律 5/5 通过 · 错误集中在"设计品味"而非"纪律违规" | `docs/agent-test-prompts.md` |
 
 ## 路线图：用 Sokoban 把想法压到底
 

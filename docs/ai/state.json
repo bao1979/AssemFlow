@@ -2,9 +2,9 @@
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
   "updatedAt": "2026-07-03",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口，MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。**MVP-4 已归档（D-015，2026-07-03）**。**交付物 A 三条提示词首轮实测均已跑完（2026-07-03）**：B-01 加冰面（★★★☆☆，暴露两条 error pattern：契约完备性局部化 + 无产品级考量）；A-01 加一关（✅ 通过，格式纪律满分但主题表面化 + 零内部障碍偏保守）；C-01 修 bug（✅ 通过，修复极简、0-indexed 映射准确、flood-fill 解释正确）。详见 docs/agent-test-prompts.md 对应实测记录。上下文包暂不修改，保持跨模型对比公正性；跑够 3 家后再定是否补入 pattern 提醒。**当前任务**：跨模型重跑 A+B+C（至少再跑 1-2 家模型）以确认 error pattern 稳定性。",
-  "phase": "交付物 A 三条提示词首轮已跑完（A/B/C 各 1 轮），待跨模型对比确认 error pattern 稳定性",
-  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015）。引擎以 Godot 为词汇参照。Studio 长期方向已选：**面向想做网页小游戏的非程序员，对标 GDevelop**（AFP 甜区在回合制 + 事件驱动实时，A+B 档；不做 60fps 动作类）。当前项目瓶颈：Q-003（A/B/C 三条提示词首轮已跑完；A-01 暴露主题表面化+零内部障碍偏保守；B-01 暴露契约完备性局部化+无产品级考量；C-01 无错误。全局最突出 pattern：模型在"遵守纪律正确产出"上表现好，在"设计质量/产品级考量"上系统性偏弱。需跨模型重跑确认 pattern 稳定性）/ Q-001（演化零证据）/ 证据集中在 Sokoban 一个场景。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。**Sokoban 验证链已收官**（MVP-0/1/2/3 完成、MVP-4 归档 D-015，22 文件 173 测试全过、typecheck 0 错）；**交付物 A 已完成 · Q-003 转 verified**（限 DeepSeek 单模型跨任务，2026-07-03）——A-01 加一关 ✅ / B-01 加冰面 ★★★☆☆ / C-01 修 bug ✅；硬边界纪律 5/5 通过；错误 pattern 集中在「设计质量 / 产品级考量」维度而非「纪律遵守」维度（契约完备性局部化 + 无产品级考量 + 主题表面化 + 零内部障碍偏保守）。上下文包 docs/agent-test-context.md 保持不动（现在加进 pattern 提醒等于教模型做题，会污染跨模型证据加固的公正性）。项目瓶颈从三块收窄到两块：Q-001 演化零证据 + 场景多样性。",
+  "phase": "阶段性收官 · Sokoban 链完成 + 交付物 A 完成 · 待选下一章方向（候选：第二场景 / Q-001 演化实证）",
+  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015）。引擎以 Godot 为词汇参照。Studio 长期方向已选：**面向想做网页小游戏的非程序员，对标 GDevelop**（AFP 甜区在回合制 + 事件驱动实时，A+B 档；不做 60fps 动作类）。当前项目瓶颈已从三块收窄到两块：Q-001（演化零证据，项目最大诚实债 · afp-core.md 亲手标注为待验证假设）/ 场景多样性（正面证据集中在 Sokoban + 三个初始实验，易被质疑过拟合）。Q-003 跨模型稳定性留作证据加固——若外部读者质疑「单模型不算数」则触发 Claude/GPT/Gemini 复跑；当前 verified 结论不因此撤回。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -37,7 +37,7 @@
     },
     "spec-paradigm-validation-sokoban": {
       "status": "Wrapped (MVP-4 archived)",
-      "notes": "全局路线图 docs/paradigm-validation-sokoban-roadmap.md。MVP-0/1/2/3 已落地实现（MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关，22 文件 173 测试全过 / SMOKE 三项达标 / 真人浏览器三关验收通过 / CLI 四份关卡冒烟通过）；发表闸口就绪。**MVP-4 已归档（D-015，2026-07-03）**——判据 2/4 转移到独立工作项（判据 2 等真实业务场景重启；判据 4 由交付物 A 独立推进）。Sokoban 链的甜区证据链已完整，项目重心转到证据深化（Q-003 AI 实证 / Q-001 演化实证 / 第二场景防过拟合）。"
+      "notes": "全局路线图 docs/paradigm-validation-sokoban-roadmap.md。MVP-0/1/2/3 已落地实现（MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关，22 文件 173 测试全过 / SMOKE 三项达标 / 真人浏览器三关验收通过 / CLI 四份关卡冒烟通过）；发表闸口就绪。**MVP-4 已归档（D-015，2026-07-03）**——判据 2/4 转移到独立工作项（判据 2 等真实业务场景重启；判据 4 由交付物 A 独立推进）。Sokoban 链的甜区证据链已完整，项目重心转到证据深化（Q-003 已 verified · Q-001 演化实证 · 第二场景防过拟合）。"
     }
   },
   "decisions": [
@@ -57,13 +57,14 @@
     { "id": "D-015", "decision": "MVP-4 归档（deferred），Sokoban 验证链就此收官。项目重心从「验证扩容」切换到「证据深化 + 外部曝光」——具体转向由 Plucker518 选择（当前候选：交付物 A 的 AI 实测提示词包）。归档理由与重启触发条件见 docs/ai/decisions-archive.json D-015。" }
   ],
   "nextSteps": [
-    "交付物 A 三条提示词首轮全部跑完（DeepSeek），模型能力达标可产出合规 AFP 配置。不再追加跨模型对比——当前证据已足够支撑 Q-003 的方向判断",
-    "新场景探索：RPG Maker 风格角色动画制作功能——检验 AFP 在 spritesheet 动画数据驱动场景下的适配度（第二个场景，防过拟合）",
-    "候选 · Q-001 演化实证：拿现有块做一次模拟 breaking change，记录迁移路径与类型系统兜底效果",
+    "**当前阶段已收官**：Sokoban 验证链完成 + 交付物 A 完成（Q-003 转 verified）+ 项目最缺证据从 3 块收窄到 2 块（Q-001 / 场景多样性）。待选下一章方向",
+    "候选下一步 · 第二场景验证（Studio 方向的产品化预演）：RPG Maker 风格角色动画 / 人物生成器——检验 AFP 在 spritesheet 数据驱动场景下的适配度，同时消灭「场景多样性」空档",
+    "候选下一步 · Q-001 演化实证：拿现有块做一次模拟 breaking change，记录迁移路径与类型系统兜底效果——偿还项目最大诚实债（20-40h）",
+    "证据加固（可选）：Q-003 跨模型复跑（Claude / GPT / Gemini）——若外部读者质疑单模型证据则触发，当前 verified 不因此撤回",
     "外部曝光（贯穿）：README 顶部动图、首发文章、GitHub Issues 拆分"
   ],
   "openQuestions": [
-    "详见 docs/open-questions.md。当前 open：Q-001~Q-002、Q-004、Q-006~Q-020、Q-024、Q-025；in_progress：Q-003（交付物 A 首条实测 B-01 已完成 2026-07-03，暴露两条错误 pattern，待 A/C 补齐 + 跨模型对比）、Q-026（MVP-0 完成、阶段性默认 A、非终局）、Q-028（MVP-1/2/3 兑现判据 1+3；判据 2/4 转独立工作项——MVP-4 归档见 D-015、判据 4 由交付物 A 独立推进）；已 resolved：Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景）。项目当前最缺的两块证据（Q-003 首批数据在跑）：Q-001（演化）/ 第二场景（防过拟合）。"
+    "详见 docs/open-questions.md。当前 open：Q-001~Q-002、Q-004、Q-006~Q-020、Q-024、Q-025；in_progress：Q-026（MVP-0 完成、阶段性默认 A、非终局）、Q-028（MVP-1/2/3 兑现判据 1+3；判据 2/4 转独立工作项——MVP-4 归档见 D-015、判据 4 由交付物 A 独立推进）；已 resolved：Q-003（verified · 限 DeepSeek 单模型跨任务 · 2026-07-03）、Q-005、Q-021~Q-023、Q-027（avoided，限回合制事件驱动场景）。项目当前最缺的两块证据：Q-001（演化）/ 场景多样性（防过拟合）。"
   ],
   "knownIssues": [
     { "id": "K-EVOL", "issue": "可靠演化未经证明（详见 Q-001）", "status": "open" },
