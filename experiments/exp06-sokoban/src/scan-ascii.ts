@@ -48,7 +48,17 @@ export interface RawScan {
  *   - 全空文本 / 单空行：返回 width=0, height=0, 各集合为空——不抛错
  *   - invalidChars 是权威记录：合法字符集外的字符逐个记录 { pos, ch }
  */
+/** 输入文本最大大小（1MB），防止恶意巨型关卡导致 OOM。 */
+const MAX_INPUT_BYTES = 1 * 1024 * 1024;
+
 export function scanAscii(text: string): RawScan {
+  // 输入大小防御
+  if (text.length > MAX_INPUT_BYTES) {
+    throw new Error(
+      `关卡文本过大（${text.length} 字符），超出上限 ${MAX_INPUT_BYTES} 字符（1MB），拒绝扫描`,
+    );
+  }
+
   // \r 兼容
   const normalized = text.replace(/\r/g, "");
 

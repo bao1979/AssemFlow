@@ -9,10 +9,9 @@
  *         对配置与调用方不可见（违背"配置即图"，故带 @paradigm 标记）。
  *
  * 两块复用同一个纯函数 `transition()`，转移逻辑保持同一，避免逻辑差异污染 A/B 对比。
- * 沿用 exp01 约定：跨包深路径 import 引擎公共 API（../../../../engine/src/index.js）。
  */
 
-import { BlockRegistry, type BlockDef } from "../../../../engine/src/index.js";
+import { BlockRegistry, type BlockDef } from "@assemflow/core";
 import { Type } from "@sinclair/typebox";
 
 import {

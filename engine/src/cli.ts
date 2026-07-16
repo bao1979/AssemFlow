@@ -16,18 +16,28 @@
  */
 
 import { parseArgs } from "node:util";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { Type } from "@sinclair/typebox";
 import { BlockRegistry } from "./registry.js";
 import { checkConfig } from "./check.js";
 import { generateGraph } from "./graph.js";
+import { parseJsonc } from "./jsonc.js";
 import type { FlowConfig, BlockDef } from "./types.js";
 
+/** 配置文件最大大小（10MB），防止恶意巨型配置导致 OOM。 */
+const MAX_CONFIG_BYTES = 10 * 1024 * 1024;
+
 function loadJsonc(path: string): unknown {
-  const raw = readFileSync(resolve(path), "utf-8");
-  const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
-  return JSON.parse(stripped);
+  const resolved = resolve(path);
+  const fileSize = statSync(resolved).size;
+  if (fileSize > MAX_CONFIG_BYTES) {
+    throw new Error(
+      `配置文件 "${path}" 大小 ${fileSize} 字节超出上限 ${MAX_CONFIG_BYTES} 字节（10MB），拒绝加载`,
+    );
+  }
+  const raw = readFileSync(resolved, "utf-8");
+  return parseJsonc(raw);
 }
 
 /**

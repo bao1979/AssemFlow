@@ -70,6 +70,8 @@ export function render(grid: GridState, container: HTMLElement, opts?: RenderOpt
 
   const pre = doc.createElement("pre");
   pre.className = "sokoban-grid";
+  pre.setAttribute("aria-live", "polite");
+  pre.setAttribute("aria-atomic", "true");
   pre.textContent = rows.join("\n");
 
   if (opts?.won === true) {

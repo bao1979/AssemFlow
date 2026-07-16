@@ -9,7 +9,7 @@
  * 以便集中管理；原导出保留不删，已有引用不受影响。
  */
 
-import { BlockRegistry } from "../../../../engine/src/index.js";
+import { BlockRegistry } from "@assemflow/core";
 import { moveWithPushBlock } from "./move-with-push.js";
 import { winCheckBlock } from "./win-check.js";
 

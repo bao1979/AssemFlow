@@ -6,4 +6,5 @@ export { BlockRegistry } from "./registry.js";
 export { checkConfig } from "./check.js";
 export { assemble, type AssembleResult } from "./assemble.js";
 export { generateGraph } from "./graph.js";
+export { parseJsonc } from "./jsonc.js";
 export type { BlockDef, StepConfig, FlowConfig, Diagnostic } from "./types.js";

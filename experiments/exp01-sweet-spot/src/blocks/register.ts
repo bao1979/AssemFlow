@@ -10,7 +10,7 @@
  *      outputSchema 用 Literal(true) 精确表达"成功路径只有 valid:true"。
  */
 
-import { BlockRegistry, type BlockDef } from "../../../../engine/src/index.js";
+import { BlockRegistry, type BlockDef } from "@assemflow/core";
 import { Type } from "@sinclair/typebox";
 
 import { emailValidate, EmailValidatorInput } from "./email-validator.js";

@@ -20,7 +20,7 @@ import { stepPush, type PushResult } from "../src/driver.js";
 import { createPushRegistry } from "../src/blocks/register.js";
 import { keyToDirection } from "../src/adapters/input-adapter.js";
 import type { Direction, GridState, Position } from "../src/grid.js";
-import type { FlowConfig, BlockRegistry } from "../../../engine/src/index.js";
+import type { FlowConfig, BlockRegistry } from "@assemflow/core";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pushConfig: FlowConfig = parseJsonc<FlowConfig>(

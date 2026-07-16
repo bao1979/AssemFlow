@@ -19,18 +19,21 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// 跨包深路径 import：沿用 exp01 约定（等 @assemflow/core 发布或加 path alias 后再改）。
-import { assemble, type AssembleResult } from "../../../engine/src/index.js";
-import type { FlowConfig, BlockRegistry } from "../../../engine/src/index.js";
+import {
+  assemble,
+  type AssembleResult,
+  type FlowConfig,
+  BlockRegistry,
+  parseJsonc,
+} from "@assemflow/core";
 
 import { createRegistryA } from "./blocks/register.js";
 import type { LightState, LightInput } from "./traffic-light.js";
 
-// ── 配置读取（沿用 exp01：简化版 JSONC，只剥行注释）────────────
+// ── 配置读取（使用 engine 统一的 JSONC 解析）─────────────────
 function loadConfig(path: string): FlowConfig {
   const raw = readFileSync(path, "utf-8");
-  const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
-  return JSON.parse(stripped) as FlowConfig;
+  return parseJsonc<FlowConfig>(raw);
 }
 
 /**

@@ -108,7 +108,12 @@ export function checkConfig(
         // 类型兼容检查
         if (inputProps && inputProps[blockField]) {
           const source = available.get(contextKey)!;
-          if (source.source !== "params" && !isTypeCompatible(source.schema, inputProps[blockField])) {
+          // params 与 initialInput 来源的字段在静态阶段类型不可知，跳过类型检查
+          if (
+            source.source !== "params" &&
+            source.source !== "initialInput" &&
+            !isTypeCompatible(source.schema, inputProps[blockField])
+          ) {
             diagnostics.push({
               level: "warning",
               step: i,
@@ -117,6 +122,13 @@ export function checkConfig(
           }
         }
       }
+    } else {
+      // 简化模式：无 inputMap，类型兼容性未在静态检查中覆盖
+      diagnostics.push({
+        level: "info",
+        step: i,
+        message: `步骤 ${i}（${step.block}）未声明 inputMap（使用简化模式），输入类型兼容性仅在运行时由 Ajv 校验`,
+      });
     }
 
     // 把本步骤的输出字段加入可用上下文

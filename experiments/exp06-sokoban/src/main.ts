@@ -8,14 +8,14 @@
  *          若门控扩到"暂停/多存档/回放"，需重评升级为 reducer / 状态机再重打标记。
  */
 
-import type { FlowConfig } from "../../../engine/src/index.js";
+import type { FlowConfig } from "@assemflow/core";
+import { parseJsonc } from "@assemflow/core";
 import { parseLevel, assertPublishableLevel, type Direction, type GridState } from "./grid.js";
 import { checkLevel } from "./check.js";
 import { createPushRegistry } from "./blocks/register.js";
 import { keyToDirection } from "./adapters/input-adapter.js";
 import { stepPush } from "./driver.js";
 import { render } from "./render.js";
-import { parseJsonc } from "./jsonc.js";
 
 import { LEVELS, DEFAULT_LEVEL, PUBLISHABLE_LEVELS } from "./levels-manifest.js";
 import pushConfigRaw from "./configs/push.jsonc?raw";
@@ -65,7 +65,7 @@ export function bootstrap(
   render(currentGrid, container);
 
   // ── 外部主循环 ──
-  window.addEventListener("keydown", (event) => {
+  function handleKeydown(event: KeyboardEvent): void {
     // R/r 重开
     if (event.key === "r" || event.key === "R") {
       currentGrid = parseLevel(levelText);
@@ -92,7 +92,17 @@ export function bootstrap(
     currentGrid = result.nextGrid;
     won = result.won;
     render(currentGrid, container, { won });
-  });
+  }
+
+  window.addEventListener("keydown", handleKeydown);
+
+  // 返回清理函数，调用方可移除监听器（支持 HMR / 多次调用场景）
+  const cleanup = (): void => {
+    window.removeEventListener("keydown", handleKeydown);
+  };
+
+  // 将清理函数挂到 container 上，方便外部获取
+  (container as unknown as Record<string, unknown>)["__sokoban_cleanup"] = cleanup;
 
   return { currentGrid, levelText, levelName };
 }

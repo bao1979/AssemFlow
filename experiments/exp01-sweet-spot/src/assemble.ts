@@ -19,18 +19,14 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// 跨包深路径 import：等 @assemflow/core 发布或加 path alias 后再改。
-import { assemble, type AssembleResult } from "../../../engine/src/index.js";
-import type { FlowConfig } from "../../../engine/src/index.js";
+import { assemble, type AssembleResult, type FlowConfig, parseJsonc } from "@assemflow/core";
 
 import { createRegistry } from "./blocks/register.js";
 
 // ── 配置读取 ────────────────────────────────────────────────
 function loadConfig(path: string): FlowConfig {
   const raw = readFileSync(path, "utf-8");
-  // 简化版 JSONC：只剥行注释，不处理块注释（教学够用）
-  const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
-  return JSON.parse(stripped) as FlowConfig;
+  return parseJsonc<FlowConfig>(raw);
 }
 
 // ── 调用者面向的输入 ─────────────────────────────────────────

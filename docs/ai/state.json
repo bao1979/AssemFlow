@@ -2,9 +2,9 @@
   "_doc": "AssemFlow 唯一高频状态真相源（SSOT）。AI 每次完成工作只更新本文件的变动字段。架构细节见 system-design.md，已退场决策见 decisions-archive.json。",
   "updatedAt": "2026-07-03",
   "project": "AssemFlow",
-  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口，MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。**MVP-4 已归档（D-015，2026-07-03）**。**交付物 A 首条实测已完成（2026-07-03）**：B-01 加冰面地形（含追问一轮）✅ 通过底线（★★★☆☆）、暴露两条稳定错误 pattern——(1) 契约完备性局部化（改字符集不主动扫其它 check.ts 规则）(2) 无产品级考量（字符选择只顾合法唯一、不顾可读易看混）。详见 docs/agent-test-prompts.md「已回填记录 · 轮次 B-01」。上下文包 docs/agent-test-context.md 暂不修改，保持跨模型对比公正性；跑够 3 家后再定是否补入 pattern 提醒。",
-  "phase": "交付物 A 首条实测完成，待 C/A 补齐 + 跨模型对比",
-  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015）。引擎以 Godot 为词汇参照。Studio 长期方向已选：**面向想做网页小游戏的非程序员，对标 GDevelop**（AFP 甜区在回合制 + 事件驱动实时，A+B 档；不做 60fps 动作类）——具体规划留在 Studio 战略稿（尚未开）。当前项目瓶颈：Q-003（B-01 首条实测已完成、暴露两条错误 pattern：契约完备性局部化 + 无产品级考量；需 A/C 提示词补齐 + 跨模型对比再定阈值）/ Q-001（演化零证据）/ 证据集中在 Sokoban 一个场景。",
+  "summary": "装配流编程（AFP）参考实现引擎。三个初始实验已完成，实验①端到端跑在 engine.assemble() 上。项目目标升级为「寻找 AI 介入模式下的更优编程范式」，终极验证标的定为 Sokoban 网页游戏（路线图 docs/paradigm-validation-sokoban-roadmap.md）。MVP-0/1/2/3 已完成落地，MVP-2 = 发表闸口，MVP-3 = 3 关关卡集 + base 静态 check 独立工具 + URL 切关（22 文件 173 测试全过、typecheck 0 错）。**MVP-4 已归档（D-015，2026-07-03）**。**交付物 A 三条提示词首轮实测均已跑完（2026-07-03）**：B-01 加冰面（★★★☆☆，暴露两条 error pattern：契约完备性局部化 + 无产品级考量）；A-01 加一关（✅ 通过，格式纪律满分但主题表面化 + 零内部障碍偏保守）；C-01 修 bug（✅ 通过，修复极简、0-indexed 映射准确、flood-fill 解释正确）。详见 docs/agent-test-prompts.md 对应实测记录。上下文包暂不修改，保持跨模型对比公正性；跑够 3 家后再定是否补入 pattern 提醒。**当前任务**：跨模型重跑 A+B+C（至少再跑 1-2 家模型）以确认 error pattern 稳定性。",
+  "phase": "交付物 A 三条提示词首轮已跑完（A/B/C 各 1 轮），待跨模型对比确认 error pattern 稳定性",
+  "note": "项目目标升级（D-013）：寻找 AI agent 与人协作下的最优范式（允许混合 AFP + reducer/状态机/ECS，非 AFP 处用 @paradigm 标记）。Sokoban 链已推进 MVP-0/1/2/3，MVP-4 于 2026-07-03 归档（D-015）。引擎以 Godot 为词汇参照。Studio 长期方向已选：**面向想做网页小游戏的非程序员，对标 GDevelop**（AFP 甜区在回合制 + 事件驱动实时，A+B 档；不做 60fps 动作类）。当前项目瓶颈：Q-003（A/B/C 三条提示词首轮已跑完；A-01 暴露主题表面化+零内部障碍偏保守；B-01 暴露契约完备性局部化+无产品级考量；C-01 无错误。全局最突出 pattern：模型在"遵守纪律正确产出"上表现好，在"设计质量/产品级考量"上系统性偏弱。需跨模型重跑确认 pattern 稳定性）/ Q-001（演化零证据）/ 证据集中在 Sokoban 一个场景。",
   "modules": {
     "feasibility-analysis": { "status": "Done", "notes": "可行性分析定稿 v0.1。" },
     "paradigm-discipline": { "status": "Done", "notes": "afp-core.md 宪法 + 全部 steering AFP 化。" },
@@ -57,12 +57,9 @@
     { "id": "D-015", "decision": "MVP-4 归档（deferred），Sokoban 验证链就此收官。项目重心从「验证扩容」切换到「证据深化 + 外部曝光」——具体转向由 Plucker518 选择（当前候选：交付物 A 的 AI 实测提示词包）。归档理由与重启触发条件见 docs/ai/decisions-archive.json D-015。" }
   ],
   "nextSteps": [
-    "**下一步 · 先跑 C（修 bug 关卡）**：最短用例（5-10 分钟），先摸模型对 CLI 报错定位 + 坐标推理的手感——若 C 也过底线，说明模型在 AFP 三层分工下的正面表现稳定",
-    "**紧跟 · 跑 A（加一关）**：Studio 未来最核心用例——'非程序员用 AI 加关卡'的直接投影；A 的错误 pattern 决定 Studio v0.1 的 AI 交互形态",
-    "**再跟 · 换家跑 B（跨模型对比）**：同一版 agent-test-context.md、同一条 B 提示词、不追问，看 B-01 的两条 pattern（契约完备性局部化 / 无产品级考量）是否跨模型稳定复现；3 家复现→触发 context.md § 11 补 pattern 提醒",
-    "**Q-003 触发 resolved 的判据**：A/B/C 至少覆盖 2 家模型 + 首批错误 pattern 稳定（连续 2 条同类）→ 汇总一次分析（docs/agent-test-prompts.md 汇总模板），据此改进上下文包 / 提示词或宣告 verified/falsified",
-    "**并行 · Studio 战略稿**（可选）：Plucker518 想开 Studio 时，先起 docs/studio-strategy.md 稿子——定位（对标 GDevelop）、场景边界（A+B 档：回合制 + 事件驱动实时）、能力清单深度",
-    "候选下一步 · Q-001 演化实证（20-40h）/ 第二个场景 mini AFP 验证（40+h）",
+    "交付物 A 三条提示词首轮全部跑完（DeepSeek），模型能力达标可产出合规 AFP 配置。不再追加跨模型对比——当前证据已足够支撑 Q-003 的方向判断",
+    "新场景探索：RPG Maker 风格角色动画制作功能——检验 AFP 在 spritesheet 动画数据驱动场景下的适配度（第二个场景，防过拟合）",
+    "候选 · Q-001 演化实证：拿现有块做一次模拟 breaking change，记录迁移路径与类型系统兜底效果",
     "外部曝光（贯穿）：README 顶部动图、首发文章、GitHub Issues 拆分"
   ],
   "openQuestions": [

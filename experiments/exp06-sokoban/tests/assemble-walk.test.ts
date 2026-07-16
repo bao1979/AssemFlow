@@ -24,7 +24,7 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { assemble, type FlowConfig } from "../../../engine/src/index.js";
+import { assemble, type FlowConfig } from "@assemflow/core";
 import { createWalkRegistry } from "../src/blocks/move-step.js";
 import { stepWalk } from "../src/driver.js";
 import { parseLevel, type GridState } from "../src/grid.js";

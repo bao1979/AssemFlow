@@ -35,7 +35,7 @@ export interface FlowConfig {
  * check 命令的诊断结果
  */
 export interface Diagnostic {
-  level: "error" | "warning";
+  level: "error" | "warning" | "info";
   step: number;
   message: string;
 }

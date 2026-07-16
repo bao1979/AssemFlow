@@ -14,7 +14,7 @@
  *      确定性只要求值可预测、可复现。
  */
 
-import { BlockRegistry, type BlockDef } from "../../../../engine/src/index.js";
+import { BlockRegistry, type BlockDef } from "@assemflow/core";
 import { Type } from "@sinclair/typebox";
 
 import {

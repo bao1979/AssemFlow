@@ -15,7 +15,7 @@
  *   5. 推链只允许一层（R1.5）——一次只推一个箱子，不推并排箱，不拉。
  */
 
-import type { BlockDef } from "../../../../engine/src/index.js";
+import type { BlockDef } from "@assemflow/core";
 import { Type } from "@sinclair/typebox";
 
 import {

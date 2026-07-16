@@ -25,9 +25,24 @@ import {
   type AssembleResult,
   type BlockRegistry,
   type FlowConfig,
-} from "../../../engine/src/index.js";
+} from "@assemflow/core";
 
 import type { Direction, GridState } from "./grid.js";
+
+/** 运行时类型守卫：验证 unknown 值是否为合法的 GridState。 */
+function isGridState(value: unknown): value is GridState {
+  if (value === null || typeof value !== "object") return false;
+  const g = value as Record<string, unknown>;
+  return (
+    typeof g.width === "number" &&
+    typeof g.height === "number" &&
+    typeof g.player === "object" &&
+    g.player !== null &&
+    Array.isArray(g.walls) &&
+    Array.isArray(g.boxes) &&
+    Array.isArray(g.goals)
+  );
+}
 
 /**
  * 跑一回合走路：喂入当前网格 + 方向，返回下一网格。
@@ -50,7 +65,13 @@ export function stepWalk(
     throw new Error(result.error ?? "stepWalk: assemble 失败（未知原因）");
   }
 
-  return result.context["nextGrid"] as GridState;
+  const nextGrid = result.context["nextGrid"];
+  if (!isGridState(nextGrid)) {
+    throw new Error(
+      `stepWalk: 块输出 "nextGrid" 类型无效（期望 GridState，实际为 ${typeof nextGrid}）`,
+    );
+  }
+  return nextGrid;
 }
 
 // ── MVP-2: 推箱驱动 ─────────────────────────────────────────
@@ -84,8 +105,14 @@ export function stepPush(
     throw new Error(result.error ?? "stepPush: assemble 失败（未知原因）");
   }
 
+  const nextGrid = result.context["nextGrid"];
+  if (!isGridState(nextGrid)) {
+    throw new Error(
+      `stepPush: 块输出 "nextGrid" 类型无效（期望 GridState，实际为 ${typeof nextGrid}）`,
+    );
+  }
   return {
-    nextGrid: result.context["nextGrid"] as GridState,
-    won: result.context["won"] as boolean,
+    nextGrid,
+    won: Boolean(result.context["won"]),
   };
 }

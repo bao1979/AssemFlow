@@ -14,11 +14,25 @@
  */
 
 import Ajv from "ajv";
+import type { ValidateFunction } from "ajv";
+import type { TSchema } from "@sinclair/typebox";
 import type { BlockRegistry } from "./registry.js";
 import type { FlowConfig } from "./types.js";
 import { checkConfig } from "./check.js";
 
 const ajv = new Ajv({ allErrors: true });
+
+/** ajv.compile() 缓存：以 schema 引用为键，避免热路径中重复 JSON.stringify 序列化。 */
+const validatorCache = new Map<TSchema, ValidateFunction>();
+
+function getValidator(schema: TSchema): ValidateFunction {
+  let v = validatorCache.get(schema);
+  if (!v) {
+    v = ajv.compile(schema);
+    validatorCache.set(schema, v);
+  }
+  return v;
+}
 
 export interface AssembleResult {
   success: boolean;
@@ -62,8 +76,8 @@ export function assemble(
       blockInput = { ...context };
     }
 
-    // 用 Ajv 校验输入是否符合块的契约
-    const validate = ajv.compile(block.inputSchema);
+    // 用 Ajv 校验输入是否符合块的契约（使用缓存避免重复 compile）
+    const validate = getValidator(block.inputSchema);
     if (!validate(blockInput)) {
       return {
         success: false,
@@ -87,8 +101,8 @@ export function assemble(
       };
     }
 
-    // 用 Ajv 校验输出是否符合块声明的 outputSchema（强契约的运行时保障）
-    const validateOutput = ajv.compile(block.outputSchema);
+    // 用 Ajv 校验输出是否符合块声明的 outputSchema（强契约的运行时保障，使用缓存）
+    const validateOutput = getValidator(block.outputSchema);
     if (!validateOutput(output)) {
       return {
         success: false,

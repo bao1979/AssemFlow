@@ -23,17 +23,17 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { FlowConfig } from "../../../engine/src/index.js";
+import type { FlowConfig } from "@assemflow/core";
+import { parseJsonc } from "@assemflow/core";
 import { stepA } from "../src/driver-a.js";
 import { StatefulRunner } from "../src/driver-b.js";
 import { createRegistryA, createRegistryB } from "../src/blocks/register.js";
 import type { LightState, LightInput } from "../src/traffic-light.js";
 
-// ── 配置读取（与 driver-a/driver-b 同款简化版 JSONC：只剥行注释）──────────
+// ── 配置读取（使用 engine 统一的 JSONC 解析）──────────
 function loadConfig(path: string): FlowConfig {
   const raw = readFileSync(path, "utf-8");
-  const stripped = raw.replace(/^\s*\/\/.*$/gm, "");
-  return JSON.parse(stripped) as FlowConfig;
+  return parseJsonc<FlowConfig>(raw);
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

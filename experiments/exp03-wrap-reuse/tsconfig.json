@@ -9,7 +9,10 @@
     "noImplicitReturns": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@assemflow/core": ["../../engine/src/index.ts"]
+    }
   },
   "include": ["src", "tests"]
 }

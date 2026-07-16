@@ -13,7 +13,7 @@
  *      ∀ b ∈ boxes: b ∈ goals（⊆）与 boxes ≡ goals（集合相等）等价，无需再算基数。
  */
 
-import type { BlockDef } from "../../../../engine/src/index.js";
+import type { BlockDef } from "@assemflow/core";
 import { Type } from "@sinclair/typebox";
 
 import { type GridState, GridStateSchema } from "../grid.js";
